@@ -17,13 +17,10 @@ public class Semantic {
 	}
 	public void algo(){
 		for (Identificador ident : ide) {
-			if( ident.getTipo().equals("boolean")){
-				if(!ident.getValor().matches("(false|true)")){ //tipo correcto de dato
-					//
-					salida += "\tError Semantico, Fila: "+ident.getFila()+" \""+ident.getValor()+"\" no es un valor booleano\n";
-				}
-			}else if(ident.getTipo().equals("int")){
-				if( ident.getValor().matches("(true|false)")){
+			switch (ident.getTipo()) {
+			case "int":
+				String exp = "(true|false|([0-9]+\\.[0-9]+f?)|(\".*\"))";
+				if( ident.getValor().matches(exp)){
 					salida += "\tError Semantico, Fila: "+ident.getFila()+" \""+ident.getValor()+"\" no es un valor entero\n";
 				}else{
 					try {	//verifica si el valor es un digito
@@ -33,7 +30,28 @@ public class Semantic {
 						
 
 					}
-				}		
+				}
+				break;
+			case "double":
+							
+				break;
+			case "boolean":
+				if(!ident.getValor().matches("(false|true)")){ //tipo correcto de dato
+					//
+					salida += "\tError Semantico, Fila: "+ident.getFila()+" \""+ident.getValor()+"\" no es un valor booleano\n";
+				}
+				break;
+			case "String":
+				if(!ident.getValor().matches("\".*\"")){ //tipo correcto de dato
+					salida += "\tError Semantico, Fila: "+ident.getFila()+" \""+ident.getValor()+"\" no es una Cadena\n";
+				}
+				break;
+			case "float":
+				
+				break;
+
+			default:
+				break;
 			}
 		}
 	}

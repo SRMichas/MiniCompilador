@@ -78,7 +78,7 @@ public class Documento extends DefaultStyledDocument{
 		oldString = currentString;
 	}
 	private boolean palabraRes(String palabra){
-		if( palabra.matches("(if|while|public|private|true|false|class|boolean|int)"))
+		if( palabra.matches("(if|while|public|private|true|false|class|boolean|int|static|double|void)"))
 			return true;
 		return false;
 	}

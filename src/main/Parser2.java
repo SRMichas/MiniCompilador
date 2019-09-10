@@ -106,10 +106,12 @@ public class Parser2 {
 				break;
 			}
 			break;
-		case Token.OP:
-			if(to.equals("arit"))
-				salida +="Error Sintactico, Fila: "+cp.getFila()+" se esperaba un operador aritmetico\t"+cp.getToken()+"\n";
-			else
+		case Token.OPL:
+			//if(to.equals("arit"))
+				salida +="Error Sintactico, Fila: "+cp.getFila()+" se esperaba un operador logico\t"+cp.getToken()+"\n";
+			break;
+		case Token.OPA:
+			salida +="Error Sintactico, Fila: "+cp.getFila()+" se esperaba un operador aritmetico\t"+cp.getToken()+"\n";
 			break;
 		case Token.TIPO:
 			salida +="Error Sintactico, Fila: "+cp.getFila()+" se esperaba un \"int\" o \"boolean\"\t"+cp.getToken()+"\n";
@@ -130,8 +132,28 @@ public class Parser2 {
 		salida2 += "Token obtenido:"+cp.getToken()+"\n"+"Token Esperado: "+to+"\n-------------------------------------------\n";
 		
 	}
+	private void MD(){
+		Token c = cp;
+		if( !c.getToken().equals("}")){
+			Acomodar(Token.MOD, "public");
+			Acomodar(Token.PR, "static");
+			Acomodar(Token.PR, "void");
+			ID();
+			Acomodar(Token.SE, "(");
+			Acomodar(Token.SE,")");
+			Acomodar(Token.SE, "{");
+			S();
+			Acomodar(Token.SE, "}");
+		}
+		
+	}
 	private void CD(){
-		Token c = cp,cs = compo.get(idx + 1);
+		Token c = cp,cs = null;
+		try {
+			cs = compo.get(idx + 1);
+		} catch (IndexOutOfBoundsException e) {
+			cs = new Token(-1, "", -1, -1);
+		}
 		if(!c.getToken().equals("class")){
 			M();
 		}
@@ -148,12 +170,18 @@ public class Parser2 {
 		//if(c.getTipo() == Componente.MOD || c.getTipo() == Componente.TIPO )
 		FD();
 		//-----------------S
-		S();
+		//S();
+		MD();
 		Acomodar(Token.SE,"}");
 	}
 	private void FD(){
-		Token c = cp;
-		if(c.getTipo() == Token.MOD || c.getTipo() == Token.TIPO){
+		Token c = cp, caux;
+		try {
+			caux = compo.get(idx + 1);
+		} catch (IndexOutOfBoundsException e) {
+			caux = new Token(-1, "", -1, -1);
+		}
+		if((c.getTipo() == Token.MOD || c.getTipo() == Token.TIPO) && caux.getTipo() != Token.PR){
 			VDN();
 			c = cp;
 			Acomodar(Token.SE,";");
@@ -181,6 +209,8 @@ public class Parser2 {
 			IL();
 		else if(c.getTipo() == Token.VAL)
 			BL();
+		else if( c.getTipo() == Token.STG)
+			STGL();
 	}
 	private void E(){
 		TE();
@@ -196,7 +226,7 @@ public class Parser2 {
 		if(c.getToken().matches("(>|<|>=|<=|==|!=)"))
 			Avanza();
 		else
-			error(Token.OP,"log");
+			error(Token.OPL,"log");
 		c = cp;
 		if(c.getTipo() == Token.DIG)
 			IL();
@@ -245,12 +275,24 @@ public class Parser2 {
 		Token c = null, caux = null;
 		c = cp;
 		//if(c.getToken().matches("(int|boolean)"))
-		if(c.getToken().equals("int"))
+		/*if(c.getToken().equals("int"))
 			Avanza();
 		else if(c.getToken().equals("boolean"))
 			Avanza();
+		else if(c.getToken())
 		else
+			error(Token.TIPO, "");*/
+		
+		switch (c.getToken()) {
+		case "int": 	Avanza(); break;
+		case "boolean": Avanza(); break;
+		case "String": 	Avanza(); break;
+		case "double": 	Avanza(); break;
+		case "float": 	Avanza(); break;
+		default:
 			error(Token.TIPO, "");
+			break;
+		}
 	}
 	private void M(){
 		Token c = null,caux = null;
@@ -269,6 +311,15 @@ public class Parser2 {
 		Token c;
 		Avanza();
 	}
+	private void STGL(){
+		Avanza();
+	}
+	private void DBL(){
+		Avanza();
+	}
+	private void FTL(){
+		Avanza();
+	}
 	private void ID(){
 		Token c = null,caux = null,cauxa=null,cauxaa=null;
 		String men = "";
@@ -282,10 +333,10 @@ public class Parser2 {
 				cauxa = compo.get(idx);
 				cauxaa = compo.get(idx + 1);
 			} catch (IndexOutOfBoundsException e) {
-				c = new Token(9, "invalido", -1, -1);
-				caux = new Token(9, "invalido", -1, -1);
-				cauxa = new Token(9, "invalido", -1, -1);
-				cauxaa = new Token(9, "invalido", -1, -1);
+				c = new Token(-1, "invalido", -1, -1);
+				caux = new Token(-1, "invalido", -1, -1);
+				cauxa = new Token(-1, "invalido", -1, -1);
+				cauxaa = new Token(-1, "invalido", -1, -1);
 			}
 			
 			if( caux.getToken().equals("class"))
@@ -293,7 +344,7 @@ public class Parser2 {
 			else if(caux.getTipo() == Token.TIPO && cauxa.getToken().equals(";"))
 				ide.add(new Identificador(c.getToken(),caux.getToken(), "",c.getFila()));
 			else if(cauxa.getToken().equals("=") && caux.getTipo() == Token.TIPO &&
-					(cauxaa.getTipo() == Token.DIG || cauxaa.getTipo() == Token.VAL)){
+					(cauxaa.getTipo() == Token.DIG || cauxaa.getTipo() == Token.VAL || cauxaa.getTipo() == Token.STG)){
 				ide.add(new Identificador(c.getToken(), caux.getToken(), cauxaa.getToken(),c.getFila()));
 			}else if(cauxa.getToken().equals("=") && (cauxaa.getTipo() == Token.DIG || cauxaa.getTipo() == Token.TIPO)){
 				String salida  = "";
@@ -321,7 +372,7 @@ public class Parser2 {
 		if(c.getToken().matches("[\\+|-|/|\\*]"))
 			Avanza();
 		else
-			error(Token.OP, "arit");
+			error(Token.OPA, "arit");
 		IL();
 		
 		Acomodar(Token.SE,";");

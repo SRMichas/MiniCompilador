@@ -516,7 +516,7 @@ public class Parser {
 		int n1 = contador("}"),n2 = contador("{");
 		if(!c.getToken().equals("}")){
 			//imprime = true;
-			if(cauxa.getTipo() == Token.SE || cauxa.getTipo() == Token.OP)
+			if(cauxa.getTipo() == Token.SE || cauxa.getTipo() == Token.OPL)
 				salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", se esperaba un }\n";
 			else
 				salida += "\tError Sintactico en linea: "+cauxa.getFila()+" columna "+cauxa.getColumna()+", se esperaba un {\n";
@@ -619,7 +619,7 @@ public class Parser {
 		Token c = comp.valor,caux = comp.sig.valor,cauxa = comp.ant.valor;
 		//System.out.println(c.getToken());
 		if(caux.getToken().equals("=")){
-			if(caux.getTipo() != Token.OP && caux.getTipo() != Token.DIG)
+			if(caux.getTipo() != Token.OPL && caux.getTipo() != Token.DIG)
 				salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", asignacion no valida\n";
 			
 		}else if(c.getToken().equals(";") || c.getTipo() != Token.DIG)
@@ -645,7 +645,7 @@ public class Parser {
 		Token c = comp.valor,caux = comp.sig.valor;
 		//System.out.println(c.getToken());
 		if(caux.getToken().equals("="))
-			if(caux.getTipo() != Token.OP && caux.getTipo() != Token.DIG)
+			if(caux.getTipo() != Token.OPL && caux.getTipo() != Token.DIG)
 				salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", asignacion no valida\n";
 		try {
 			comp = comp.sig;
@@ -672,12 +672,12 @@ public class Parser {
 				return;
 			}
 			if(cauxa.getTipo() == Token.TIPO && caux.getToken().equals(";"))
-				ide.add(new Identificador(c.getToken(),cauxa.getToken(), ""));
+				ide.add(new Identificador(c.getToken(),cauxa.getToken(), "",0));
 			else if( cauxa.getToken().equals("class"))
-				ide.add(new Identificador(c.getToken(),"class",""));
+				ide.add(new Identificador(c.getToken(),"class","",0));
 			else if(caux.getToken().equals("=") && cauxa.getTipo() == Token.TIPO &&
 					(comp.sig.sig.valor.getTipo() == Token.DIG || comp.sig.sig.valor.getTipo() == Token.VAL ))
-				ide.add(new Identificador(c.getToken(), cauxa.getToken(),comp.sig.sig.valor.getToken() ));
+				ide.add(new Identificador(c.getToken(), cauxa.getToken(),comp.sig.sig.valor.getToken(),0));
 			else if(caux.getToken().equals("=") && (comp.sig.sig.valor.getTipo() == Token.DIG || comp.sig.sig.valor.getTipo() == Token.TIPO)){
 				Nodo<Token> xi = comp;
 				comp = comp.sig.sig;

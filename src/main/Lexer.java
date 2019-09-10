@@ -5,8 +5,8 @@ import java.util.ArrayList;
 public class Lexer {
 	
 	private String salida;
-	private static final String[] COMLEX = {"(class|if|while)","[{|}|\\;|=|(|)]","(>|<|>=|<=|==|!=|\\+|-|/|\\*)",
-			"(boolean|int)","(public|private)","[1-9]?[0-9]","(true|false)","[a-z|_]+"};
+	private static final String[] COMLEX = {"(class|if|while|static|void)","[{|}|\\;|=|(|)]","(>|<|>=|<=|==|!=)","(\\+|-|/|\\*)",
+			"(boolean|int|String|double|float)","(public|private)",/*"[1-9]?[0-9]"*/"[0-9]{1,3}(\\.[0-9]{1,3}f?)?","(true|false)","\".*\"",/*"[0-9]{1,3}\\.[0-9]{1,3}f",*/"[a-z|_]+"};
 	private ArrayList<Token> arr = new ArrayList<>();
 	private boolean Bandera = true;
 
@@ -23,7 +23,7 @@ public class Lexer {
 				 int j = i + 1;				//Avanzamos al siguiente caracter
 				 columna++;					//Incrementamos la columna
 				 try {
-					 while(Character.isLetterOrDigit(cad.charAt(j))){		// mientras el siguente caracter sea digito o letra
+					 while(Character.isLetterOrDigit(cad.charAt(j)) || cad.charAt(j) == '.'){		// mientras el siguente caracter sea digito o letra
 						 token += cad.charAt(j);		//concatenamos el caracter
 						 j++;							//incrementamos el contador
 						 columna++;						//incrementamos el no. de columna
@@ -44,6 +44,19 @@ public class Lexer {
 					 }
 				} catch (StringIndexOutOfBoundsException e) { }
 				 i = j-1;
+			 }else if( car == '\"'){
+				 token += car;
+				 int j = i + 1;
+				 car = cad.charAt(j);
+				 try {
+					while(car != '\"'){
+						token += car;
+						j++;
+						car = cad.charAt(j);
+					}
+				 }catch (StringIndexOutOfBoundsException e) { }
+				 token += car;
+				 i = j;
 			 }else if(String.valueOf(car).matches("\\S")){	//el caracter de cualquier caracter que no sea un espacion en blanco,un tabulador, un retorno de carro o un salto de linea
 				 token += car;		//concatenamos el caracter
 				 columna++;
