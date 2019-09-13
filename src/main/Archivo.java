@@ -35,10 +35,11 @@ public class Archivo {
 				  guardar=abre;
 				  FileReader archivos=new FileReader(guardar);
 			      BufferedReader lee=new BufferedReader(archivos);
+			      
 			      while((aux=lee.readLine())!=null)
 			      {
 			         documento+= aux+ "\n";
-			      }
+			      }			
 			      nombreArch = remueveExtension(guardar.getName());
 			      lee.close();
 			    }

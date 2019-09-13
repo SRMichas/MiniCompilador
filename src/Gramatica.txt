@@ -1,0 +1,40 @@
+	class_declaration  = < modifier >  "class" identifier "{"  < field_declaration > <main_declaration> "}" 
+
+	main_declaration = "public" "static" "void" "main" "(" ")" "{" <statement> "}"
+ 
+	field_declaration  =  variable_declaration  ";"   
+ 
+	variable_declaration  =   < modifier > (type (variable_declarator/identifier)"  
+ 
+	variable_declarator  =   identifier "=" (integer_literal / boolean_literal / string_literal / double_literal / float_literal)
+ 
+	expression  =  testing_expression  
+ 
+	testing_expression  =   ((integer_literal / identifier / double_literal / float_literal)  (  ">"   /  "<"   /  ">="   /  "<="   /  "=="   /  "!="  )  (integer_literal / identifier/ double_literal / float_literal)) 
+ 
+ 
+	statement  = variable_declaration / if_statement/ while_statement 
+ 
+	while_statement =  "while"  "(" expression  ")" "{"  < statement >  "}" 
+ 
+	if_statement =   "if"  "(" expression  ")" "{" aritmetica_expression < statement >  "}"                   
+
+	type  =  type_specifier   
+ 
+	type_specifier =   "boolean"   /  "int"    
+ 
+	modifier =   "public"   /  "private"     
+ 
+	integer_literal =   ( (  "1..9" <  "0..9"  > )  
+
+	double_literal = "0..9" "." "0..9"
+
+	float_literal = "0..9" "." "0..9" "f"
+ 
+	boolean_literal = true / false 
+
+	string_literal = " ("any character") " 
+ 
+	identifier  =   "a..z,_"  //(a-z)*  
+ 
+	aritmetica_expression  =  (identifier "=" ((integer_literal / double_literal / float_literal)  ( "+" / "-" / â€�/â€� /  â€�*â€�) (integer_literal / double_literal / float_literal) â€œ;â€�)

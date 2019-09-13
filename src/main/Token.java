@@ -1,21 +1,22 @@
 package main;
 
 public class Token {
-	final static int PR=0;
-	final static int SE = 1;
-	final static int OPL = 2;
-	final static int OPA = 3;
-	final static int TIPO  = 4;
-	final static int MOD = 5;
-	final static int DIG = 6;
-	final static int VAL = 7;
-	final static int STG = 8;
-	final static int ID = 9;
+	public final static int PR=0;
+	public final static int SE = 1;
+	public final static int OPL = 2;
+	public final static int OPA = 3;
+	public final static int TIPO  = 4;
+	public final static int MOD = 5;
+	public final static int DIG = 6;
+	public final static int VAL = 7;
+	public final static int STG = 8;
+	public final static int ID = 9;
+	public final static int EOF = 10;
 	
 	private String desc,token;
 	private int tipo,columna,fila;
 	private String [] significado = {"Palabra reservada","Simbolo especial","Operador Logico","Operador Aritmetico"
-			,"Tipo","Modificador","Digito","Valor","Cadena","Identificador"};
+			,"Tipo","Modificador","Digito","Valor","Cadena","Identificador","Fin del archivo"};
 
 
 	public Token(int tp,String t,int col, int fi){

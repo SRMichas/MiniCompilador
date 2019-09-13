@@ -2,7 +2,6 @@ package Grafico;
 
 import java.util.ArrayList;
 import javax.swing.table.AbstractTableModel;
-
 import main.Token;
 
 public class ModeloTabla extends AbstractTableModel{
@@ -48,7 +47,10 @@ public class ModeloTabla extends AbstractTableModel{
 			break;
 		case 1: 
 			if( cl != null)
-				val = cl.getToken();
+				if( cl.getTipo() == Token.EOF)
+					val = "";
+				else
+					val = cl.getToken();
 			else
 				val = "";
 			break;

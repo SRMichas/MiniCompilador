@@ -10,15 +10,12 @@ import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-
 import Formato.Documento2;
 import Formato.Formato;
 import main.Analizador;
 import main.Archivo;
 import main.Token;
-import main.Identificador;
 import main.Parser2;
-
 import java.awt.BorderLayout;
 import javax.swing.JTable;
 import javax.swing.JScrollPane;
@@ -35,7 +32,6 @@ import java.util.ArrayList;
 import javax.swing.KeyStroke;
 import java.awt.event.KeyEvent;
 import java.awt.event.InputEvent;
-
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import java.awt.Dimension;
@@ -67,7 +63,7 @@ public class Ventana extends JFrame{
 	private Archivo ach;
 	private Analizador bot = new Analizador();
 	private ModeloTabla mt;
-	private ModeloTabla2 mt2;
+	//private ModeloTabla2 mt2;
 	//Oyentes
 	private Oyente O = new Oyente();
 	
@@ -301,7 +297,7 @@ public class Ventana extends JFrame{
 		table.setDefaultRenderer(Object.class, new Formato());		//Indica el formato de las celdas
 		table.setRowHeight(22);										//Tamaño del renglon
 	}
-	private void creaTabla2(ArrayList<Identificador> a){
+	/*private void creaTabla2(ArrayList<Identificador> a){
 		mt2 = new ModeloTabla2(a);								//Creaacion del modelo de tabla
 		table = new JTable();										//Instancia de la tabla
 		table.setModel(mt);
@@ -309,11 +305,7 @@ public class Ventana extends JFrame{
 		table.getTableHeader().setReorderingAllowed(false);			//quira la opcion de reordenar la cabezera de la tabla
 		table.setDefaultRenderer(Object.class, new Formato());		//Indica el formato de las celdas
 		table.setRowHeight(22);										//Tamaño del renglon
-	}
-	
-	public static void main(String[] args) {
-		new Ventana();
-	}
+	}*/
 
 	class Oyente implements ActionListener{
 
@@ -342,8 +334,8 @@ public class Ventana extends JFrame{
 				WorkSpace ks = (WorkSpace) workSpace.getComponentAt(i);
 				ach = ks.getArchivo();
 				String texto = ach.OpenFile(Ventana.this), //Metodo que abre el Arhivo
-						n = ach.nombreArch,
-						dato = ach.txt;
+						n = ach.nombreArch/*,
+						dato = ach.txt*/;
 				//JOptionPane.showMessageDialog(null, dato);
 				boolean p1 = !texto.equals("");		//Verifica si se abrio algun archivo
 				if( p1 ){

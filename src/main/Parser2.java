@@ -9,9 +9,10 @@ public class Parser2 {
 	String salida = "";
 	public static String salida2 ="";
 	private int idx = 0;
-	private int contador = 0,conIF = 0,conDV = 0;
-	private boolean imprime,avanza = false,ideC = false;
+//	private int contador = 0,conIF = 0,conDV = 0;
+	private boolean /*imprime,avanza = false,*/ideC = false;
 	private ArrayList<Identificador> ide;
+	private final static int sinValor = 30,exceso = 31;
 	public Parser2(ArrayList<Token >c){
 		compo = c;
 		cp = compo.get(idx);
@@ -48,11 +49,21 @@ public class Parser2 {
 			}
 		}
 	}*/
-	private void Acomodar(int tipo ,String s){
+	private boolean Acomodar(int tipo ,String s,String sig){
 		if(cp.getTipo() == tipo && cp.getToken().equals(s)){
 			Avanza();
+			return true;
 		}else{
 			error(tipo,s);
+			Token tok = null;
+			try {
+				tok = compo.get( idx + 1);
+			} catch (IndexOutOfBoundsException e) {
+				tok = new Token(-1, "", -1, -1);
+			}
+			if(tok.getToken().equals(sig))
+				Avanza();
+			return false;
 		}
 	}
 	private void Avanza(){
@@ -126,44 +137,43 @@ public class Parser2 {
 			salida +="Error Sintactico, Fila: "+cp.getFila()+" se esperaba \"true\" o \"false\"\t"+cp.getToken()+"\n";
 			break;
 		case Token.ID:
-			salida +="Error Sintactico, Fila: "+cp.getFila()+" se esperaba un identificador\t"+cp.getToken()+"\n";
+				if((to.length() == 0 || to.length() != 0) && !cp.getToken().equals(to))
+					salida +="Error Sintactico, Fila: "+cp.getFila()+" se esperaba el identificador \""+to+"\"\t"+cp.getToken()+"\n";
+				else
+					salida +="Error Sintactico, Fila: "+cp.getFila()+" se esperaba un identificador\t"+cp.getToken()+"\n";
 			break;
+		case sinValor:
+			salida +="Error Sintactico, Fila: "+cp.getFila()+" se ";
+			break;
+		case exceso:
+			salida += "Error Sintactico, Fila: "+cp.getFila()+" \""+to+"\" no concuerda con la gramatica\n";
+			break;
+
+
 		}
 		salida2 += "Token obtenido:"+cp.getToken()+"\n"+"Token Esperado: "+to+"\n-------------------------------------------\n";
 		
 	}
-	private void MD(){
-		Token c = cp;
-		if( !c.getToken().equals("}")){
-			Acomodar(Token.MOD, "public");
-			Acomodar(Token.PR, "static");
-			Acomodar(Token.PR, "void");
-			ID();
-			Acomodar(Token.SE, "(");
-			Acomodar(Token.SE,")");
-			Acomodar(Token.SE, "{");
-			S();
-			Acomodar(Token.SE, "}");
-		}
-		
-	}
+	
 	private void CD(){
-		Token c = cp,cs = null;
+		Token c = cp;
+		/*
+		 * ,cs = null
 		try {
 			cs = compo.get(idx + 1);
 		} catch (IndexOutOfBoundsException e) {
 			cs = new Token(-1, "", -1, -1);
-		}
+		}*/
 		if(!c.getToken().equals("class")){
 			M();
 		}
 		c = cp;
-		Acomodar(Token.PR,"class");
+		Acomodar(Token.PR,"class","");
 			
 		c = cp;
 		ID();
 		c = cp;
-		Acomodar(Token.SE,"{");
+		Acomodar(Token.SE,"{","");
 		
 		//-----------------FD
 		c = cp;
@@ -172,7 +182,30 @@ public class Parser2 {
 		//-----------------S
 		//S();
 		MD();
-		Acomodar(Token.SE,"}");
+		Acomodar(Token.SE,"}","\uffff");
+		if( cp.getTipo() != Token.EOF){
+			while(cp.getTipo() != Token.EOF){
+				//men = cp.getToken()+" ";	
+				error(exceso, cp.getToken());
+				Avanza();
+			}
+		}else
+			Acomodar(Token.EOF, "\uffff", null);
+	}
+	private void MD(){
+		Token c = cp;
+		if( !c.getToken().equals("}")){
+			Acomodar(Token.MOD, "public","static");
+			Acomodar(Token.PR, "static","void");
+			Acomodar(Token.PR, "void","main");
+			Acomodar(Token.ID,"main","(");
+			Acomodar(Token.SE, "(",")");
+			Acomodar(Token.SE,")","{");
+			Acomodar(Token.SE, "{","}");
+			S();
+			Acomodar(Token.SE, "}","}");
+		}
+		
 	}
 	private void FD(){
 		Token c = cp, caux;
@@ -184,12 +217,12 @@ public class Parser2 {
 		if((c.getTipo() == Token.MOD || c.getTipo() == Token.TIPO) && caux.getTipo() != Token.PR){
 			VDN();
 			c = cp;
-			Acomodar(Token.SE,";");
+			Acomodar(Token.SE,";","public");
 		}
 	}
 	private void VDN(){
-		conDV++;
-		Token c= null ,caux = null;
+		//conDV++;
+		Token c= null;
 		c = cp;
 		if(c.getTipo() != Token.TIPO)
 			M();
@@ -200,27 +233,39 @@ public class Parser2 {
 			Avanza();
 			VDR();
 		}
-		contador ++;
+		//contador ++;
 	}
 	private void VDR(){
-		Token c,cauxa;
+		Token c;
 		c = cp;
-		if(c.getTipo() == Token.DIG)
-			IL();
-		else if(c.getTipo() == Token.VAL)
+		if(c.getTipo() == Token.DIG){
+			if( c.getToken().contains(".") && c.getToken().contains("f"))
+				FTL();
+			else if( c.getToken().contains("."))
+				DBL();
+			else
+				IL();
+		}else if(c.getTipo() == Token.VAL)
 			BL();
 		else if( c.getTipo() == Token.STG)
 			STGL();
+		else 
+			error(sinValor,"");
 	}
 	private void E(){
 		TE();
 	}
 	private void TE(){
-		Token c = null,caux = null;
+		Token c = null;
 		c = cp;
-		if(c.getTipo() == Token.DIG)
-			IL();
-		else
+		if(c.getTipo() == Token.DIG){
+			if( c.getToken().contains(".") && c.getToken().contains("f"))
+				FTL();
+			else if( c.getToken().contains("."))
+				DBL();
+			else
+				IL();
+		}else
 			ID();
 		c = cp;
 		if(c.getToken().matches("(>|<|>=|<=|==|!=)"))
@@ -228,13 +273,18 @@ public class Parser2 {
 		else
 			error(Token.OPL,"log");
 		c = cp;
-		if(c.getTipo() == Token.DIG)
-			IL();
-		else
+		if(c.getTipo() == Token.DIG){
+			if( c.getToken().contains(".") && c.getToken().contains("f"))
+				FTL();
+			else if( c.getToken().contains("."))
+				DBL();
+			else
+				IL();
+		}else
 			ID();
 	}
 	private void S(){
-		Token c = null,caux = null;
+		Token c = null;
 		c = cp;
 		if(c.getToken().equals("if")){
 			Avanza();
@@ -247,24 +297,24 @@ public class Parser2 {
 		}
 	}
 	private void WS(){
-		Token c=null,caux = null,cauxa = null;
-		c = cp;
-		Acomodar(Token.SE,"(");
+		/*Token c=null,caux = null,cauxa = null;
+		c = cp;*/
+		Acomodar(Token.SE,"(","");
 		E();
-		Acomodar(Token.SE,")");
-		Acomodar(Token.SE,"{");
+		Acomodar(Token.SE,")","{");
+		Acomodar(Token.SE,"{","");
 		S();
-		Acomodar(Token.SE,"}");
+		Acomodar(Token.SE,"}","");
 	}
 	private void IS(){
-		Token c;
-		c = cp;
-		Acomodar(Token.SE,"(");
+		/*Token c;
+		c = cp;*/
+		Acomodar(Token.SE,"(","");
 		E();
-		Acomodar(Token.SE,")");
-		Acomodar(Token.SE,"{");
+		Acomodar(Token.SE,")","{");
+		Acomodar(Token.SE,"{","");
 		AE();
-		Acomodar(Token.SE,"}");
+		Acomodar(Token.SE,"}","");
 		
 		S();
 	}
@@ -272,7 +322,7 @@ public class Parser2 {
 		TS();
 	}
 	private void TS(){
-		Token c = null, caux = null;
+		Token c = null;
 		c = cp;
 		//if(c.getToken().matches("(int|boolean)"))
 		/*if(c.getToken().equals("int"))
@@ -295,7 +345,7 @@ public class Parser2 {
 		}
 	}
 	private void M(){
-		Token c = null,caux = null;
+		Token c = null;
 		c = cp;
 		if(c.getToken().equals("public")) 
 			Avanza();
@@ -305,10 +355,10 @@ public class Parser2 {
 			error(Token.MOD, "");
 	}
 	private void IL(){
-		Acomodar(Token.DIG, cp.getToken());
+		Acomodar(Token.DIG, cp.getToken(),"");
 	}
 	private void BL(){
-		Token c;
+		
 		Avanza();
 	}
 	private void STGL(){
@@ -325,7 +375,7 @@ public class Parser2 {
 		String men = "";
 		c = cp;
 		men = cp.getToken();
-		Acomodar(Token.ID,c.getToken());
+		Acomodar(Token.ID,c.getToken(),"");
 		if( ideC){
 			try {
 				c = compo.get(idx - 1);
@@ -365,19 +415,36 @@ public class Parser2 {
 		c = cp;
 		ID();
 		
-		Acomodar(Token.SE,"=");
+		Acomodar(Token.SE,"=","");
 		
-		IL();
+		if(c.getTipo() == Token.DIG){
+			if( c.getToken().contains(".") && c.getToken().contains("f"))
+				FTL();
+			else if( c.getToken().contains("."))
+				DBL();
+			else
+				IL();
+		}else
+			ID();
 		c = cp;
 		if(c.getToken().matches("[\\+|-|/|\\*]"))
 			Avanza();
 		else
 			error(Token.OPA, "arit");
-		IL();
 		
-		Acomodar(Token.SE,";");
+		if(c.getTipo() == Token.DIG){
+			if( c.getToken().contains(".") && c.getToken().contains("f"))
+				FTL();
+			else if( c.getToken().contains("."))
+				DBL();
+			else
+				IL();
+		}else
+			ID();
+		
+		Acomodar(Token.SE,";","");
 	}
-	private int contador(String t){
+	/*private int contador(String t){
 		int c = 0;
 		/*Nodo<Componente> aux = componentes.inicio();
 		while(aux != null){
@@ -385,9 +452,9 @@ public class Parser2 {
 				c++;
 			aux = aux.sig;
 			
-		}*/
+		}
 		return c;
-	}
+	}*/
 	public ArrayList<Identificador> r(){
 		return ide;
 	}

@@ -2,8 +2,6 @@ package Formato;
 
 import java.awt.Color;
 import java.util.ArrayList;
-
-import javax.swing.JOptionPane;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
@@ -17,7 +15,7 @@ public class Documento2 extends DefaultStyledDocument{
 	private static final long serialVersionUID = 1L;
 	private StyleContext cont;
 	private AttributeSet attr,attrBlack;
-	private final static Color r_PR = new Color(127, 0, 145);
+	//private final static Color r_PR = new Color(127, 0, 145);
 			//r_CAD = new Color(42, 0, 255);
 	private ArrayList<coloreado> a;
 	String currentString,oldString;
@@ -88,11 +86,6 @@ public class Documento2 extends DefaultStyledDocument{
 			}
 		}
 		oldString = currentString;
-	}
-	private boolean palabraRes(String palabra){
-		if( palabra.matches("(if|while|public|private|true|false|class|boolean|int)"))
-			return true;
-		return false;
 	}
 	class coloreado{
 		int pos;

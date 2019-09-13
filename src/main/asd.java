@@ -10,6 +10,11 @@ public class asd {
 		double var = 1.;
 		System.out.println(s2.matches(s1));
 		System.out.println(Float.parseFloat("1.23"));
+		
+		String num = "1.";
+		System.out.println("Float "+num+" correcto? "+Float.parseFloat(num));
+		float f = 1f;
+		System.out.println(num.contains(".f"));
 	}
 
 }

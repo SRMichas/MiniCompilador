@@ -9,9 +9,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-
 import Formato.Formato;
-import main.Token;
 import main.Identificador;
 
 public class TablaSimbolosEx2 extends JDialog{

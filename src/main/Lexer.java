@@ -4,55 +4,57 @@ import java.util.ArrayList;
 
 public class Lexer {
 	
-	private String salida;
+	public String salida;
 	private static final String[] COMLEX = {"(class|if|while|static|void)","[{|}|\\;|=|(|)]","(>|<|>=|<=|==|!=)","(\\+|-|/|\\*)",
-			"(boolean|int|String|double|float)","(public|private)",/*"[1-9]?[0-9]"*/"[0-9]{1,3}(\\.[0-9]{1,3}f?)?","(true|false)","\".*\"",/*"[0-9]{1,3}\\.[0-9]{1,3}f",*/"[a-z|_]+"};
+			"(boolean|int|String|double|float)","(public|private)",/*"[1-9]?[0-9]"*/"[0-9]{1,3}(\\.[0-9]{1,3}f?)?","(true|false)",
+			"\".*\"",/*"[0-9]{1,3}\\.[0-9]{1,3}f",*/"[a-z|_]+"};
 	private ArrayList<Token> arr = new ArrayList<>();
 	private boolean Bandera = true;
 
-	public boolean lexico(String cad){
+	public boolean lexico(char[] carac){
 		salida = "";
 		arr.clear();				//Limpia el Arragloe de los tokens
 		String token = "";
 		boolean noError = false;		//Variable que controla los noErrores
 		int columna = 0, linea = 1;	//Varibbles que cuentan la linea y la columna
-		for (int i = 0; i < cad.length(); i++) {	//REcorremos la cadena
-			 char car = cad.charAt(i);				//Tomamos el caracter segun la posicion
+		for (int i = 0; i < carac.length; i++) {	//REcorremos la cadena
+			 //char car = cad.charAt(i);				//Tomamos el caracter segun la posicion
+			char car = carac[i];
 			 if(Character.isLetterOrDigit(car)){	// El caracter es un numero o digito?
 				 token += car;				//Concatenamos el caracter en el token
 				 int j = i + 1;				//Avanzamos al siguiente caracter
 				 columna++;					//Incrementamos la columna
 				 try {
-					 while(Character.isLetterOrDigit(cad.charAt(j)) || cad.charAt(j) == '.'){		// mientras el siguente caracter sea digito o letra
-						 token += cad.charAt(j);		//concatenamos el caracter
+					 while(Character.isLetterOrDigit(carac[j]) || carac[j] == '.'){		// mientras el siguente caracter sea digito o letra
+						 token += carac[j];		//concatenamos el caracter
 						 j++;							//incrementamos el contador
 						 columna++;						//incrementamos el no. de columna
-						 if(j == cad.length()) break;	//en caso de que el indice sea igual que el tamaño de la cadena; salimos del ciclo interno
+						 if(j == carac.length) break;	//en caso de que el indice sea igual que el tamaño de la cadena; salimos del ciclo interno
 					 }
-				} catch (StringIndexOutOfBoundsException e) { }
+				} catch (ArrayIndexOutOfBoundsException e) { }
 				 i = j-1;					//regresamos el contador
 			 }else if( isOperator(car)){	//pregunta si el caracter es un operador
 				 token += car;		//concatenamos
 				 int j = i + 1;		//
 				 columna++;
 				 try {
-					 while(isOperator(cad.charAt(j))){
-						 token += cad.charAt(j);
+					 while(isOperator(carac[j])){
+						 token += carac[j];
 						 j++;
 						 columna++;
-						 if(j == cad.length()) break;
+						 if(j == carac.length) break;
 					 }
-				} catch (StringIndexOutOfBoundsException e) { }
+				} catch (ArrayIndexOutOfBoundsException e) { }
 				 i = j-1;
-			 }else if( car == '\"'){
+			 }else if( car == '\"'){			//
 				 token += car;
 				 int j = i + 1;
-				 car = cad.charAt(j);
+				 car = carac[j];
 				 try {
 					while(car != '\"'){
 						token += car;
 						j++;
-						car = cad.charAt(j);
+						car = carac[j];
 					}
 				 }catch (StringIndexOutOfBoundsException e) { }
 				 token += car;
@@ -78,14 +80,15 @@ public class Lexer {
 			}
 			 
 			if(noError == false){ //en caso de que el token sea uno no valido
-				if(car != '\n' || car != '\r' || car != '\t' || car != ' '){// se descarta la opcion de que sea un salto de liena o un retorno de carro o un tabulador o un espacion en blanco 
+				if(car != '\n' || car != '\r' || car != '\t' || car != ' ')// se descarta la opcion de que sea un salto de liena o un retorno de carro o un tabulador o un espacion en blanco 
 					//muestra la salida de los errores por consola
-					salida += "\tError en el token \""+token+"\" en la posicion Columna: "+columna+"\t Linea: "+linea+"\n";
-				}
+					//salida += "\tError en el token \""+token+"\" en la posicion Columna: "+columna+"\t Linea: "+linea+"\n";
+					salida += "\tError Lexico Columna:"+columna+" Linea: "+linea+", el token \""+token+"\" no es aceptado y/o soportado\n";
 			}
 			 token = "";			//vaciamos el token
 			 noError = false;		//lo devolvemos como al inicio
 		}
+		arr.add(new Token(Token.EOF, "\uffff", linea, columna));
 		if(!salida.equals("")) Bandera = false;
 		return Bandera;
 	}

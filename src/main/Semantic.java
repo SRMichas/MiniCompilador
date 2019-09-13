@@ -33,7 +33,7 @@ public class Semantic {
 				}
 				break;
 			case "double":
-							
+				
 				break;
 			case "boolean":
 				if(!ident.getValor().matches("(false|true)")){ //tipo correcto de dato
