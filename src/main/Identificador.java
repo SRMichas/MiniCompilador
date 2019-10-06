@@ -13,12 +13,26 @@ public class Identificador {
 	public String getTipo() {
 		return tipo;
 	}
+	public void setNombre(String nombre) {
+		this.nombre = nombre;
+	}
+	public void setTipo(String tipo) {
+		this.tipo = tipo;
+	}
+	public void setValor(String valor) {
+		this.valor = valor;
+	}
+	public void setFila(int fila) {
+		this.fila = fila;
+	}
 	public String getValor() {
 		return valor;
 	}
 	public int getFila(){
 		return fila;
 	}
+	
+	
 	
 	
 }

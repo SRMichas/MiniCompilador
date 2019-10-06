@@ -66,7 +66,7 @@ public class Documento extends DefaultStyledDocument{
 			char car = t.charAt(i);
 			if( Character.isLetterOrDigit(car) || car == '_'){
 				P += car;
-			}else if(car == '\"'){
+			}else if(car == '"'){
 					i++;
 					car = t.charAt(i);
 					P += car;

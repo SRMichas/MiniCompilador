@@ -17,7 +17,7 @@
  
 	while_statement =  "while"  "(" expression  ")" "{"  < statement >  "}" 
  
-	if_statement =   "if"  "(" expression  ")" "{" aritmetica_expression < statement >  "}"                   
+	if_statement =   "if"  "(" expression  ")" "{" aritmetica_expression   "}"	< statement >                   
 
 	type  =  type_specifier   
  
@@ -31,10 +31,10 @@
 
 	float_literal = "0..9" "." "0..9" "f"
  
-	boolean_literal = true / false 
+	boolean_literal = "true" / "false" 
 
 	string_literal = " ("any character") " 
  
 	identifier  =   "a..z,_"  //(a-z)*  
  
-	aritmetica_expression  =  (identifier "=" ((integer_literal / double_literal / float_literal)  ( "+" / "-" / â€�/â€� /  â€�*â€�) (integer_literal / double_literal / float_literal) â€œ;â€�)
+	aritmetica_expression  =  (identifier "=" ((integer_literal / double_literal / float_literal)  ( "+" / "-" / "/" /  "*") (integer_literal / double_literal / float_literal) ";")

@@ -39,7 +39,8 @@ public class Analizador {
 			salida += sem.Semantico();
 		}
 		if( salida.endsWith("Sintacticos\n")){
-			salida += "\tNo hay errores Semanticos\n";
+			salida += "\tNo hay errores Semanticos\n"+
+					"\n\tPrograma Compilado con exito";
 		}
 		return salida;
 	}
