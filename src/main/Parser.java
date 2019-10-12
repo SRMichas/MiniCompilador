@@ -4,748 +4,546 @@ import java.util.ArrayList;
 
 public class Parser {
 
-	Lista<Token> componentes;
-	Nodo<Token> comp;
+	ArrayList<Token> compo;
 	Token cp;
 	String salida = "";
-	private int contador = 0,conIF = 0;
-	private boolean imprime,avanza = false;
+	public static String salida2 ="";
+	private int idx = 0;
+	//private int contador = 0,conIF = 0,conDV = 0;
+	//private boolean /*imprime,avanza = false,*/ideC = false;
 	private ArrayList<Identificador> ide;
-	public Parser(Lista<Token> c){
-		componentes = c;
-		comp = componentes.inicio();
+	private final static int sinValor = 30,exceso = 31;
+	private short lin;
+	public Parser(ArrayList<Token >c){
+		compo = c;
+		cp = compo.get(idx);
 		ide = new ArrayList<>();
 	}
 	
 	public String Sintactico(){
+		salida2 = "";
 		CD();
 		return salida;
 	}
+
+	private boolean Acomodar(int tipo ,String s,String sig){
+		if(cp.getTipo() == tipo && cp.getToken().equals(s)){
+			Avanza();
+			return true;
+		}else{
+			error(tipo,s);
+			Token tok = null;
+			try {
+				tok = compo.get( idx + 1);
+			} catch (IndexOutOfBoundsException e) {
+				tok = new Token(-1, "", -1, -1);
+			}
+			if(tok.getToken().equals(sig))
+				Avanza();
+			return false;
+		}
+	}
+	private void Avanza(){
+		salida2 += "Token obtenido:"+cp.getToken()+"\n"+"Token Esperado: "+cp.getToken()+"\n-------------------------------------------\n";
+		if(idx < compo.size() - 1) idx++;
+		try {
+			/*if(cp.getTipo() == Token.ID) ideC = true;
+			else ideC = false;*/
+			cp = compo.get(idx);
+		} catch (IndexOutOfBoundsException e) {
+			idx--;
+			Token caux = compo.get(idx);
+			cp = new Token(19, "", caux.getColumna(), caux.getFila());
+			//error(tipo,s);
+		}
+	}
+	private void error(int t,String to){
+		switch (t) {
+		case Token.PR:
+			switch (to) {
+			case "class":
+				salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un \"class\"\n";
+				break;
+			case "if":
+				salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un \"if\"\n";
+				break;
+			case "while":
+				salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un \"while\"\n";
+				break;
+			case "void":
+				salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un \"void\"\n";
+				break;
+			case "static":
+				salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un \"static\"\n";
+				break;
+			}
+			break;
+		case Token.SE:
+			switch (to) {
+			case "{":
+				salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un \""+to+"\"\n";	
+				break;
+			case "}":
+				salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un \""+to+"\"\n";	
+				break;
+			case "(":
+				salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un \""+to+"\"\n";	
+				break;
+			case ")":
+				salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un \""+to+"\"\n";	
+				break;
+			case ";":
+				salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un \""+to+"\"\n";	
+				break;
+			default:
+				salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un Simbolo especial\n";
+				break;
+			}
+			break;
+		case Token.OPL:
+			//if(to.equals("arit"))
+				salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un operador logico\n";
+			break;
+		case Token.OPA:
+			salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un operador aritmetico\n";
+			break;
+		case Token.TIPO:
+			salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un \"int\" o \"boolean\"\n";
+			break;
+		case Token.MOD:
+			salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un \"public\" o \"private\"\n";
+			break;
+		case Token.DIG:
+			salida +="\tError Sintactico, Fila: "+cp.getFila()+" se espeba un digito\n";
+			break;
+		case Token.VAL:
+			salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba \"true\" o \"false\"\n";
+			break;
+		case Token.ID:
+				if((to.length() == 0 || to.length() != 0) && !cp.getToken().equals(to))
+					salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba el identificador \""+to+"\"\n";
+				else
+					salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un identificador\n";
+			break;
+		case Token.ID_DIG:
+			salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un identificador o un Digito\n";
+			break;
+		case sinValor:
+			salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un valor numerico o booleano o una cadena\n";
+			break;
+		case exceso:
+			salida += "\tError Sintactico, Fila: "+cp.getFila()+" \""+to+"\" no concuerda con la gramatica\n";
+			break;
+
+
+		}
+		salida2 += "Token obtenido:"+cp.getToken()+"\n"+"Token Esperado: "+to+"\n-------------------------------------------\n";
+		
+	}
+	
 	private void CD(){
-		Token c = new Token(10, "", -1, -1),caux = new Token(10, "", -1, -1);
-		
-		try {
-			c = comp.valor;
-			try { 
-				caux = comp.sig.valor;
-			} catch (NullPointerException e) { System.out.println(e);}
-		} catch (NullPointerException e) { //return; 
-		}
-		//if( c.getTipo() == Componente.MOD)
-		M();
-		
-		try {
-			c = comp.valor;
-			try {
-				caux = comp.sig.valor;
-			} catch (NullPointerException e) {
-				
-			}
-			
-		} catch (NullPointerException e) { 
-			salida += "\t2Error Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", se esperaba un \"class\"\n";
-			System.out.println(salida);
-			return; 
-		}
+		Token c = cp,c2;
+		String clss = null, id = null;
 		if(!c.getToken().equals("class")){
-			salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", se esperaba un \"class\"\n";
-			try {
-				comp = comp.sig;
-				c = comp.valor;
-			} catch (NullPointerException e) {
-				salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", se esperaba un identificador\n";
-				return;
-			}
-		}else{
-			try {
-				comp = comp.sig;
-				c = comp.valor;
-			} catch (NullPointerException e) {
-				salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", se esperaba un identificador\n";
-				return;
-			}
+			M();
 		}
-		
-		ID();
-		try {
-			c = comp.valor;
-			caux = comp.ant.valor;
-		} catch (NullPointerException e) {
-			return;
-		}
-		if(!c.getToken().equals("{")){
-			salida += "\tError Sintactico en linea: "+caux.getFila()+" columna "+caux.getColumna()+", se esperaba un \"{\"\n";
-			System.out.println(salida);
-		}else{
-			/*else if( contador(((Componente)comp.valor).getToken()) != contador("}"))
-		}
-			salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", falta un \"}\"\n";*/
-			try {
-				comp = comp.sig;
-				 c = comp.valor;
-			} catch (NullPointerException e) {
-				salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", esperaba un \"}\"";
-				return;
-			}
-		}
-		//System.out.println(c.getToken());
-		
-		
-		/*if(!c.getToken().equals("}")){
-			FD();
-			S();
-		}else if( c.getToken().equals("}") && comp.sig != null){
+		c = cp;
+		if( Acomodar(Token.PR,"class","") )
+			clss = "class";
 			
-				try {
-					comp = comp.sig;
-					 c = comp.valor;
-				} catch (NullPointerException e) {
-					salida += "se esperaba un }";
-					return;
-				}
-				if(!c.getToken().equals("}"))
-					salida += "se esperaba un }";
-				else if( contador(c.getToken()) != contador("{"))
-					salida += "falta un \"{\"\n";
-			
-		}*/
+		c = cp;
+		c2 = ID();
+		id = c2.getToken();
+		if( id != null )
+			ide.add(new Identificador(id, clss, null, c2.getFila()/*,-1*/));
+		c = cp;
+		Acomodar(Token.SE,"{","");
 		
+		//-----------------FD
+		c = cp;
+		//if(c.getTipo() == Componente.MOD || c.getTipo() == Componente.TIPO )
 		FD();
-		S();
-		try {
-			c = comp.valor;
-		} catch (NullPointerException e) {
-			//return;
-			//c = new Componente(10, "", -1, -1);
-		}
-		try{
-			if(comp.sig != null ){
-				//comp = comp.sig;
-				//String errores = ""+comp.valor.getToken()+" ";
-				String errores = "";
-				int l = comp.valor.getFila();
-				while(comp != null /*&& !comp.valor.getToken().equals("}")*/ && comp.sig != null){
-					errores += comp.valor.getToken()+" ";
-					comp = comp.sig;
-				}
-				salida += "\tError Sintactico en linea: "+l+", \""+errores+"\" no concuerda con la gramatica\n";
+		//-----------------S
+		//S();
+		MD();
+		Acomodar(Token.SE,"}","\uffff");
+		if( cp.getTipo() != Token.EOF){
+			while(cp.getTipo() != Token.EOF){
+				//men = cp.getToken()+" ";	
+				error(exceso, cp.getToken());
+				Avanza();
 			}
-		}catch(NullPointerException e){
-			
-		}
-		try {
-			c = comp.valor;
-		} catch (NullPointerException e) {
-			//return;
-			//c = new Componente(10, "", -1, -1);
-		}
-		//System.out.println(c.getToken());
-		if(!c.getToken().equals("}"))
-			salida += c.getToken()+"\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", se esperaba un }f\n";
-		//System.out.println(comp.ant.ant.valor.getToken()+"\nAnterior: "+comp.ant.valor.getToken()+"\nActual: "
-			//+comp.valor.getToken()+"\nSiguiente: "+comp.sig.valor.getToken());
-		if( imprime && contador("{") != contador("}"))
-			salida += "Error Sintactico, faltan una o varias \"}\"\n";
-		try{
-			if(comp.sig != null ){
-				//comp = comp.sig;
-				//String errores = ""+comp.valor.getToken()+" ";
-				String errores = "";
-				int l = comp.valor.getFila();
-				while(comp != null && !comp.valor.getToken().equals("}")){
-					errores += comp.valor.getToken()+" ";
-					comp = comp.sig;
-				}
-				salida += "\tError Sintactico en linea: "+l+", \""+errores+"\"no concuerda con la gramatica\n";
+		}else
+			Acomodar(Token.EOF, "\uffff", null);
+	}
+	private void MD(){
+		Token c = cp;
+		String ty = null;
+		if( !c.getToken().equals("}")){
+			Acomodar(Token.MOD, "public","static");
+			Acomodar(Token.PR, "static","void");
+			if( Acomodar(Token.PR, "void","main") )
+				ty = "void";
+			if( Acomodar(Token.ID,"main","(") && ty != null){
+				ide.add(new Identificador("main", ty, "", compo.get(idx-1).getFila()/*,-1*/));
 			}
-		}catch(NullPointerException e){
-			
+			Acomodar(Token.SE, "(",")");
+			Acomodar(Token.SE,")","{");
+			Acomodar(Token.SE, "{","}");
+			S();
+			Acomodar(Token.SE, "}","}");
 		}
-		
-		
-		//salida += "\tTermina CLASS DECLARATION\n";
 		
 	}
 	private void FD(){
-		Token c = comp.valor,caux = comp.ant.valor;
-		//System.out.println(c.getToken());
-		if(!c.getToken().equals("}") && c.getTipo() != Token.PR){
-			VDN();
-			c = comp.valor;
-			if( !caux.getToken().equals(";") && c.getToken().equals("}")){
-				salida += "\tError Sintactico en linea: "+caux.getFila()+" columna "+caux.getColumna()+", se esperaba un ;\n";
-			}else{
-				try {
-					comp = comp.sig;
-				} catch (NullPointerException e) {
-					return;
-				}
-			}
-			
+		Token c = cp, caux;
+		try {
+			caux = compo.get(idx + 1);
+		} catch (IndexOutOfBoundsException e) {
+			caux = new Token(-1, "", -1, -1);
 		}
-		//System.out.println(c.getToken());
-		//salida += "\tTermina FIELD DECLARATION\n";
+		if((c.getTipo() == Token.MOD || c.getTipo() == Token.TIPO) && caux.getTipo() != Token.PR){
+			VDN();
+			c = cp;
+			Acomodar(Token.SE,";","public");
+		}
 	}
 	private void VDN(){
-		Token c= null ,caux = null;
-		M();
-		//comp = comp.sig;
-		T();
-		try {
-			c=comp.valor;
-			caux=comp.sig.valor;
-		} catch (NullPointerException e) {
-			return;
+		//conDV++;
+		Token c= null,c2;
+		c = cp;
+		String ty = null ,nom = null, val = null;
+		if(c.getTipo() != Token.TIPO)
+			M();
+		ty = T();
+		c2 = ID();
+		if( c2 != null)
+			nom = c2.getToken();
+		c = cp;
+		if(c.getToken().equals("=")){
+			Avanza();
+			val = VDR();
 		}
-		//System.out.println(c.getToken());
-		if( c.getTipo() == Token.ID && caux.getToken().equals("=")){
-			VDR();
-		}else{
-			ID();
-		}
-		
-		//salida += "\tTermina VARIABLE DECLARATION\n";
-		contador ++;
+		if( ty != null && nom != null && val == null){
+			switch (ty) {
+			case "int": 	val = "0"; break; 
+			case "boolean": val = "false"; break;
+			case "String": 	val = "\"\""; break;
+			case "double": 	val = "0.0"; break;
+			case "float": 	val = "0.0f"; break;
+			}
+			ide.add(new Identificador(nom, ty, val, c2.getFila()/*,-1*/));
+		}else if( val != null)
+			ide.add(new Identificador(nom, ty, val, c2.getFila()/*,-1*/));
+		//contador ++;
 	}
-	private void VDR(){
-		Token c,cauxa;
-		ID();
-		try {
-			c = comp.valor;
-		} catch (NullPointerException e) {
-			return;
+	private String VDR(){
+		Token c;
+		c = cp;
+		if(c.getTipo() == Token.DIG){
+			if( c.getToken().contains(".") && c.getToken().contains("f"))
+				return ((Token)FTL()).getToken();
+			else if( c.getToken().contains("."))
+				return ((Token)DBL()).getToken();
+			else
+				return ((Token)IL()).getToken();
+		}else if(c.getTipo() == Token.VAL)
+			return BL();
+		else if( c.getTipo() == Token.STG)
+			return ((Token)STGL()).getToken();
+		else {
+			error(sinValor,"");
+			return null;
 		}
-		
-		//System.out.println(c.getToken());
-		if( !((Token)comp.valor).getToken().equals("=") ){
-			salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", se esperaba un =";
-		}
-		try {
-			comp = comp.sig;
-		} catch (NullPointerException e) {
-			return;
-		}
-		try {
-			c = comp.valor;
-			cauxa = comp.ant.valor;
-		} catch (NullPointerException e) {
-			return;
-		}
-		//caux=comp.ant.valor;
-		//System.out.println(c.getToken());
-		if( c.getTipo() == Token.DIG ){
-			IL();
-		}else if(c.getTipo() == Token.VAL){
-			BL();
-		}else{
-			salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", se esperaba un Digito o un Booleano\n";
-			avanza = true;
-		}
-		//salida += "\tTermina VARIABLE DECLARATOR\n";
 	}
 	private void E(){
 		TE();
 	}
 	private void TE(){
-		Token c = null,caux = null;
-		try {
-			c = comp.valor;
-			caux = comp.sig.valor;
-		} catch (NullPointerException e) {
-			return;
-		}
-		//System.out.println(c.getToken());
-		if(c.getTipo() == Token.DIG ){
-			IL();
-			try {
-				c = comp.valor;
-				caux = comp.sig.valor;
-			} catch (NullPointerException e) {
-				return;
-			}
-			
-		}else if( c.getTipo() == Token.ID){
-			ID();
-			try {
-				c = comp.valor;
-				caux = comp.sig.valor;
-			} catch (NullPointerException e) {
-				return;
-			}
-		}
-		//System.out.println(c.getToken());
-		if( !c.getToken().matches("[>|<|>=|<=|==|!=|\\+|-|/|\\*]")){
-			salida += "se esperaba un operador\n";
-		}
-		
-		try {
-			comp = comp.sig;
-		} catch (NullPointerException e) {
-			return;
-		}
-		try {
-			c = comp.valor;
-			caux = comp.sig.valor;
-		} catch (NullPointerException e) {
-			return;
-		}
-		//System.out.println(c.getToken());
+		Token c = null;
+		c = cp;
+		String algote = null,algote2 = null;
 		if(c.getTipo() == Token.DIG){
-			IL();
-			//comp = comp.sig;
-		}else if( c.getTipo() == Token.ID){
-			ID();
+			if( c.getToken().contains(".") && c.getToken().contains("f"))
+				FTL();
+			else if( c.getToken().contains("."))
+				DBL();
+			else
+				IL();
+		}else if(c.getTipo() == Token.DIG){
+			algote = ((Token)ID()).getToken();
+			if( algote != null && !buscar(algote))
+				ide.add(new Identificador(algote, "", "", lin/*,-1*/));
+		}else{
+			error(Token.ID_DIG, "Digito/Identificador");
+			Acomodar(Token.ID_DIG, c.getToken(), "<");
 		}
+			
+		
+		c = cp;
+		if(c.getToken().matches("(>|<|>=|<=|==|!=)")){
+			Avanza();
+		}else
+			error(Token.OPL,"log");
+		c = cp;
+		if(c.getTipo() == Token.DIG){
+			if( c.getToken().contains(".") && c.getToken().contains("f"))
+				FTL();
+			else if( c.getToken().contains("."))
+				DBL();
+			else
+				IL();
+		}else if( c.getTipo() == Token.ID){
+			algote2 = ((Token)ID()).getToken();
+			if( algote2 != null && !buscar(algote2))
+				ide.add(new Identificador(algote2, "", null, lin/*,-1*/));
+		}else
+			error(Token.ID_DIG, "Digito/Identificador");
+			
 	}
 	private void S(){
-		Token c = null,caux = null;
-		try {
-			c = comp.valor;
-			caux = comp.sig.valor;
-		} catch (NullPointerException e) {return; }
-		//Componente c = comp.valor,caux = comp.sig.valor;
-		//System.out.println(c.getToken());
-		if( c.getTipo() == Token.MOD && (caux.getToken().matches("(int|boolean)"))
-				||
-				(c.getToken().matches("(int|boolean)"))){
-			VDN();
-			try {
-				if( !avanza )
-					c = comp.valor;
-				else{
-					comp = comp.sig;
-					c = comp.valor;
-					avanza = false;
-				}
-			} catch (NullPointerException e) {
-				return;
-			}
-			if( !c.getToken().equals(";")){
-				salida += c.getToken()+"\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", se esperaba un ;\n";
-			}else{
-				try {
-					comp = comp.sig;
-					c = comp.valor;
-				} catch (NullPointerException e) {
-					return;
-				}
-			}
-			
-			
-		}else if(c.getToken().equals("if")){
+		Token c = null;
+		c = cp;
+		if(c.getToken().equals("if")){
+			Avanza();
 			IS();
 		}else if(c.getToken().equals("while")){
-			try {
-				comp = comp.sig;
-			} catch (NullPointerException e) {
-				return;
-			}
+			Avanza();
 			WS();
+		}else if(c.getTipo() == Token.MOD || c.getTipo() == Token.TIPO){
+			VDN();
+			Acomodar(Token.SE, ";", "");
+			S();
 		}
-		//salida += "\tTermina STATEMENT\n";
 	}
 	private void WS(){
-		Token c=null,caux = null,cauxa = null;
-		try {
-			c = comp.valor;
-			cauxa = comp.ant.valor;
-			caux = comp.sig.valor;
-		} catch (NullPointerException e) {
-			return;
-		}
-		//System.out.println(c.getToken());
-		if(!c.getToken().equals("(")){
-			salida += "\tError Sintactico en linea: "+caux.getFila()+" columna "+caux.getColumna()+", se esperaba un (\n";
-		}/*else if( contador(c.getToken()) != contador(")"))
-			salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", falta un \")\"\n";*/
-		else{
-			try {
-				comp = comp.sig;
-			} catch (NullPointerException e) {
-				return;
-			}
-		}
-		
+		/*Token c=null,caux = null,cauxa = null;
+		c = cp;*/
+		Acomodar(Token.SE,"(","");
 		E();
-		try {
-			c = comp.valor;
-			cauxa = comp.ant.valor;
-		} catch (NullPointerException e) {
-			return;
-		}
-		//System.out.println(c.getToken());
-		if(!c.getToken().equals(")")){
-			salida += "\tError Sintactico en linea: "+cauxa.getFila()+" columna "+cauxa.getColumna()+", se esperaba un )\n";
-		}/*else if( contador(c.getToken()) != contador("("))
-			salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", falta un \"(\"\n";*/
-		else{
-			try {
-				comp = comp.sig;
-			} catch (NullPointerException e) {
-				return;
-			}
-		}
-		
-		try {
-			c = comp.valor;
-			cauxa = comp.ant.valor;
-		} catch (NullPointerException e) {
-			return;
-		}
-		//System.out.println(c.getToken());
-		if(!c.getToken().equals("{")){
-			salida += "\tError Sintactico en linea: "+cauxa.getFila()+" columna "+cauxa.getColumna()+", se esperaba un {\n";
-		}/*else if( contador(c.getToken()) != contador("}"))
-			salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", falta un \"}\"\n";*/
-		else{
-			try {
-				comp = comp.sig;
-			} catch (NullPointerException e) {
-				return;
-			}
-		}
-		
-		
+		Acomodar(Token.SE,")","{");
+		Acomodar(Token.SE,"{","");
 		S();
-		
-		try {
-			c = comp.valor;
-			cauxa = comp.ant.valor;
-		} catch (NullPointerException e) {
-			return;
-		}
-		//System.out.println(c.getToken());
-
-		int n1 = contador("}"),n2 = contador("{");
-		if(!c.getToken().equals("}")){
-			salida += "\tError Sintactico en linea: "+cauxa.getFila()+" columna "+cauxa.getColumna()+", se esperaba un }\n";
-		}/*else if( contador(c.getToken()) != contador("{"))
-			salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", falta un \"{\"\n";*/
-		else if(c.getToken().equals("}") && n1 != n2 && comp.sig != null){
-			salida += "\tWSError Sintactico en linea: "+cauxa.getFila()+" columna "+cauxa.getColumna()+", se esperaba un }\n";
-		}else{
-			try {
-				comp = comp.sig;
-			} catch (NullPointerException e) {
-				return;
-			}
-		}
-		
-		
-		//salida += "\tTermina WHILE STATEMENT\n";
+		Acomodar(Token.SE,"}","");
 	}
 	private void IS(){
-		try {
-			comp = comp.sig;
-		} catch (NullPointerException e) {
-			return;
-		}
-		Token c=null,caux = null,cauxa = null;
-		try {
-			c = comp.valor;
-			cauxa = comp.ant.valor;
-			caux = comp.sig.valor;
-		} catch (NullPointerException e) {
-			return;
-		}
-		//System.out.println(c.getToken());
-		if(!c.getToken().equals("(")){
-			salida += "\tError Sintactico en linea: "+caux.getFila()+" columna "+caux.getColumna()+", se esperaba un (\n";
-		}/*else if( contador(c.getToken()) != contador(")"))
-			salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", falta un \")\"\n";*/
-		else{
-			try {
-				comp = comp.sig;
-			} catch (NullPointerException e) {
-				return;
-			}
-		}
-		
-		
+		/*Token c;
+		c = cp;*/
+		Acomodar(Token.SE,"(","");
 		E();
-		try {
-			c = comp.valor;
-			cauxa = comp.ant.valor;
-		} catch (NullPointerException e) {
-			return;
-		}
-		//System.out.println(c.getToken());
-		if(!c.getToken().equals(")")){
-			salida += "\tError Sintactico en linea: "+cauxa.getFila()+" columna "+cauxa.getColumna()+", se esperaba un )\n";
-		}/*else if( contador(c.getToken()) != contador("("))
-			salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", falta un \"(\"\n";*/
-		else{
-			try {
-				comp = comp.sig;
-			} catch (NullPointerException e) {
-				return;
-			}
-		}
-		try {
-			c = comp.valor;
-			cauxa = comp.ant.valor;
-		} catch (NullPointerException e) {
-			return;
-		}
-		//System.out.println(c.getToken());
-		if(!c.getToken().equals("{")){
-			salida += "\tError Sintactico en linea: "+cauxa.getFila()+" columna "+cauxa.getColumna()+", se esperaba un {\n";
-		}/*else if( contador(c.getToken()) != contador("}"))
-			salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", falta un \"}\"\n";*/
-		else{
-			try {
-				comp = comp.sig;
-				c = comp.valor;
-			} catch (NullPointerException e) {
-				return;
-			}
-		}
-		
-		
+		Acomodar(Token.SE,")","{");
+		Acomodar(Token.SE,"{","");
 		AE();
+		Acomodar(Token.SE,"}","");
 		
 		S();
-		
-		try {
-			c = comp.valor;
-			cauxa = comp.ant.valor;
-		} catch (NullPointerException e) {
-			return;
-		}
-		//System.out.println(c.getToken());
-		int n1 = contador("}"),n2 = contador("{");
-		if(!c.getToken().equals("}")){
-			//imprime = true;
-			if(cauxa.getTipo() == Token.SE || cauxa.getTipo() == Token.OPL)
-				salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", se esperaba un }\n";
-			else
-				salida += "\tError Sintactico en linea: "+cauxa.getFila()+" columna "+cauxa.getColumna()+", se esperaba un {\n";
-			/*try {
-				comp = comp.sig;
-			} catch (NullPointerException e) {
-				return;
-			}*/
-		}/*else if( contador(c.getToken()) != contador("{"))
-			salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", falta un \"{\"\n";*/
-		else if(n1 != n2 && cauxa.getToken().equals("}")){
-			//salida += "\tISError Sintactico en linea: "+cauxa.getFila()+" columna "+c.getColumna()+", se esperaba un }\n";
-			imprime = true;
-			//comp = comp.ant;
-		}else{
-			try {
-				comp = comp.sig;
-			} catch (NullPointerException e) {
-				return;
-			}
-		}
-		
-		
-		/*if( contador("}") != contador("{")){
-			//salida += "\tISError Sintactico en linea: "+cauxa.getFila()+" columna "+c.getColumna()+", se esperaba un }\n";
-			salida += "\tFalta un }\n";
-		}*/
-		//salida += "\tTermina IF STATEMENT\n";
 	}
-	private void T(){
-		TS();
-		//comp = comp.sig;
+	private String T(){
+		return TS();
 	}
-	private void TS(){
-		Token c = null, caux = null;
-		try {
-			c = comp.valor;
-			caux = comp.sig.valor;
-		} catch (NullPointerException e) {
-			return;
-		}
-		//System.out.println(c.getToken());
-		if( c.getTipo() != Token.TIPO && caux.getTipo() == Token.ID ){
-			salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", se esperaba un tipo de dato\n";
-			try {
-				comp = comp.sig;
-			} catch (NullPointerException e) {
-				return;
-			}
-		}else if(c.getTipo() != Token.TIPO && caux.getTipo() != Token.ID){
-			salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+",  Se esperaba un tipo de dato\n";
-		}else if( c.getTipo() == Token.TIPO && caux.getTipo() == Token.ID){
-			try {
-				comp = comp.sig;
-			} catch (NullPointerException e) {
-				return;
-			}
+	private String TS(){
+		Token c = null;
+		c = cp;
+		//if(c.getToken().matches("(int|boolean)"))
+		/*if(c.getToken().equals("int"))
+			Avanza();
+		else if(c.getToken().equals("boolean"))
+			Avanza();
+		else if(c.getToken())
+		else
+			error(Token.TIPO, "");*/
+		
+		switch (c.getToken()) {
+		case "int": 	Avanza(); return "int"; 
+		case "boolean": Avanza(); return "boolean";
+		case "String": 	Avanza(); return "String";
+		case "double": 	Avanza(); return "double";
+		case "float": 	Avanza(); return "float";
+		default:
+			error(Token.TIPO, "");
+			return null;
 		}
 		
-		//salida += "\tTermina TYPE SPECIFIER\n";
 	}
 	private void M(){
-		Token c = null,caux = null;
-		try {
-			c = comp.valor;
-			try {
-				caux = comp.sig.valor;
-			} catch (NullPointerException e) { return;}
-		} catch (NullPointerException e) { return;}
-		//System.out.println(c.getToken());
-		if(c.getToken().equals("class") || c.getToken().matches("(int|boolean)")){
-			//comp = comp.sig;
-			return;
-		}else if(c.getTipo() != Token.MOD && !(caux.getToken().matches("(class|boolean|int)"))){
-			salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", se esperaba un \"modificador\"\n";
-			//comp = comp.sig;
-			try {
-				comp = comp.sig;
-			} catch (NullPointerException e) {
-				return;
-			}
-		}else if(c.getTipo() != Token.MOD && (caux.getToken().matches("(class|boolean|int)"))){
-			salida = "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", se esperaba un modificador\n";
-			//comp = comp.sig;
-			try {
-				comp = comp.sig;
-			} catch (NullPointerException e) {
-				return;
-			}
-		}else if (c.getTipo() == Token.MOD)
-			try {
-				comp = comp.sig;
-			} catch (NullPointerException e) {
-				return;
-			}
-		
-		//salida += "\tTermina MODIFIER\n";
-	}
-	private void IL(){
-		Token c = comp.valor,caux = comp.sig.valor,cauxa = comp.ant.valor;
-		//System.out.println(c.getToken());
-		if(caux.getToken().equals("=")){
-			if(caux.getTipo() != Token.OPL && caux.getTipo() != Token.DIG)
-				salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", asignacion no valida\n";
-			
-		}else if(c.getToken().equals(";") || c.getTipo() != Token.DIG)
-			salida += ";\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", se esperaba un DIGITO\n";
-		else if((cauxa.getToken().equals("=") && c.getTipo() != Token.DIG) ||
-				(cauxa.getToken().matches("[\\+|-|/|*]") && c.getTipo() != Token.DIG)){
-			salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", se esperaba un DIGITO\n";
-			try {
-				comp = comp.sig;
-			} catch (NullPointerException e) {
-				return;
-			}
-		}else
-		//System.out.println(c.getToken());
-			try {
-				comp = comp.sig;
-			} catch (NullPointerException e) {
-				return;
-			}
-		//salida += "\tTermina INTEGER LITERAL\n";
-	}
-	private void BL(){
-		Token c = comp.valor,caux = comp.sig.valor;
-		//System.out.println(c.getToken());
-		if(caux.getToken().equals("="))
-			if(caux.getTipo() != Token.OPL && caux.getTipo() != Token.DIG)
-				salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", asignacion no valida\n";
-		try {
-			comp = comp.sig;
-		} catch (NullPointerException e) {
-			return;
+		Token c = null;
+		c = cp;
+		if(c.getToken().equals("public")){ 
+			Avanza();
+			//return "public";
+		}else if(c.getToken().equals("private")){ 
+			Avanza();
+			//return "private";
+		}else{
+			error(Token.MOD, "");
+			//return null;
 		}
-		//salida += "\tTermina BOOLEAN LITERAL\n";
 	}
-	private void ID(){
-		Token c,caux,cauxa;
-		try {
-			
-			c = comp.valor;
-			caux = comp.sig.valor;
-			cauxa = comp.ant.valor;
-			//comp = comp.sig;
-			//cp = comp.valor;
-			String s = caux.getToken();
-			//System.out.println(c.getToken());
-			//if( !s.matches("[{|=]"))
-				//salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", identificador no valido\n";
-			if( c.getTipo() != Token.ID){
-				salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", se esperaba un IDENTIFICADOR\n";
-				return;
-			}
-			if(cauxa.getTipo() == Token.TIPO && caux.getToken().equals(";"))
-				ide.add(new Identificador(c.getToken(),cauxa.getToken(), "",0));
-			else if( cauxa.getToken().equals("class"))
-				ide.add(new Identificador(c.getToken(),"class","",0));
-			else if(caux.getToken().equals("=") && cauxa.getTipo() == Token.TIPO &&
-					(comp.sig.sig.valor.getTipo() == Token.DIG || comp.sig.sig.valor.getTipo() == Token.VAL ))
-				ide.add(new Identificador(c.getToken(), cauxa.getToken(),comp.sig.sig.valor.getToken(),0));
-			else if(caux.getToken().equals("=") && (comp.sig.sig.valor.getTipo() == Token.DIG || comp.sig.sig.valor.getTipo() == Token.TIPO)){
-				Nodo<Token> xi = comp;
-				comp = comp.sig.sig;
-				String salida = "";
-				while(!comp.valor.getToken().equals(";")){
-					salida +=  comp.valor.getToken();
-					comp = comp.sig;
-				}
-				//salida = comp.valor.getToken();
-				ide.add(new Identificador(c.getToken(),"",salida,c.getFila()));
-				comp = xi;
-			}
-				
-			comp = comp.sig;
-		} catch (NullPointerException e) {
-			//salida += "identificador no valido\n";
+	private Token IL(){
+		Token intV = null;
+		if( Acomodar(Token.DIG, cp.getToken(),"") ){
+			intV = compo.get( idx - 1 );
+			lin = (short)compo.get( idx - 1 ).getFila();
 		}
-		//salida += "\tTermina IDENTIFIER\n";
+		return intV;
+	}
+	private String BL(){
+		String booleanV = cp.getToken();
+		lin = (short)cp.getFila();
+		Avanza();
+		return booleanV;
+	}
+	private Token STGL(){
+		Token stringV = cp;
+		lin = (short)cp.getFila();
+		Avanza();
+		return stringV;
+	}
+	private Token DBL(){
+		Token doubleV = cp;
+		//lin = (short)cp.getFila();
+		Avanza();
+		return doubleV; 
+	}
+	private Token FTL(){
+		//String floatV = cp.getToken();
+		Token floatV = cp;
+		//lin = (short)cp.getFila();
+		Avanza();
+		return floatV;
+	}
+	private Token ID(){
+		Token c = null,cosa = null;
+		c = cp;
+		if ( Acomodar(Token.ID,c.getToken(),"") ){
+			cosa = compo.get(idx - 1 );
+			//lin = (short) compo.get(idx - 1 ).getFila();
+		}
+		return cosa;
 	}
 	private void AE(){
-		ID();
-		Token c = comp.valor;
-		if( !c.getToken().equals("=") )
-			salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", se esperaba un \"=\"\n";
-		else
-			try {
-				comp = comp.sig;
-				c = comp.valor;
-			} catch (NullPointerException e) {
-				return;
-			}
-		IL();
-		c = comp.valor;
-		if( !c.getToken().matches("[\\+|-|/|\\*]") )
-			salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", se esperaba un operador aritmetico\n";
-		else
-			try {
-				comp = comp.sig;
-			} catch (NullPointerException e) {
-				return;
-			}
-		IL();
-		c = comp.valor;
-		//if(comp.ant.valor)
-		if( !c.getToken().equals(";") )
-			salida += "\tError Sintactico en linea: "+c.getFila()+" columna "+c.getColumna()+", se esperaba un ;\n";
-		else{
-			try {
-				comp = comp.sig;
-			} catch (NullPointerException e) {
-				return;
-			}
-		}
+		Token c,res;
+		c = cp;
+		String nom = null, val1 = null, op = null , val2 = null;
+		ArrayList<Token> exp = new ArrayList<>();
+		res = ID();
+		if( res != null)
+			nom = res.getToken();
+		short ind = 0;
+		boolean caca = false,caca2 = false;
+		ArrayList<Integer> pos = new ArrayList<>();
 		
-		//salida += "\tTermina ARITMETICA EXPRESSION\n";
-	}
-	private int contador(String t){
-		int c = 0;
-		Nodo<Token> aux = componentes.inicio();
-		while(aux != null){
-			if(aux.valor.getToken().equals(t))
-				c++;
-			aux = aux.sig;
+		if( nom != null){
+			if( !buscar(nom)){
+				ide.add(new Identificador(nom, "", "", res.getFila()/*,-1*/));
+				ind = (short) (ide.size() - 1);
+				caca = true;
+			}
 			
 		}
-		return c;
+		
+		Acomodar(Token.SE,"=","");
+		c = cp;
+		if(c.getTipo() == Token.DIG){
+			if( c.getToken().contains(".") && c.getToken().contains("f")){
+				res = FTL();
+				val1 = res.getToken();
+			}else if( c.getToken().contains(".")){
+				res = DBL();
+				val1 = res.getToken();
+			}else{
+				res = IL();
+				val1 = res.getToken();
+			}
+		}else if( c.getTipo() == Token.ID){
+			res = ID();
+			
+			if( res != null)
+				val1 = res.getToken();
+			
+			if( val1 != null )
+				if( !buscar(val1))
+					if( !nom.equals(val1) )
+						ide.add(new Identificador(val1, "", "", res.getFila()/*,-1*/));
+					else
+						caca2 = true;
+				else
+					caca2 = true;
+		}else
+			error(Token.ID_DIG, "");
+		
+		pos.add((int)lin);
+		exp.add(res);
+		
+		c = cp;
+		if(c.getToken().matches("[\\+|[-]|/|\\*]")){
+			op = cp.getToken();
+			pos.add(cp.getFila());
+			exp.add(c);
+			Avanza();
+		}else
+			error(Token.OPA, "arit");
+		
+		c = cp;
+		if(c.getTipo() == Token.DIG){
+			if( c.getToken().contains(".") && c.getToken().contains("f")){
+				res = FTL();
+				val2 = res.getToken();	
+			}else if( c.getToken().contains(".")){
+				res = DBL();
+				val2 = res.getToken();
+			}else{
+				res = IL();
+				val2 = res.getToken();
+			}
+		}else if( c.getTipo() == Token.ID){
+			res = ID();
+			if( res != null)
+				val2 = res.getToken();
+			if( val2 != null)
+				if( !buscar(val2))
+					if( !nom.equals(val2) )
+						ide.add(new Identificador(val2, "", "", res.getFila()/*,-1*/));
+					else
+						caca2 = true;
+				else
+					caca2 = true;
+		}else
+			error(Token.ID_DIG, "");
+		
+		pos.add((int)lin);
+		exp.add(res);
+		if( val1 != null && op != null && val2 != null)
+			if( caca ){
+				ide.get(ind).setExp(exp);
+			}else if( nom != null)
+				update(nom, val1+op+val2,caca2,exp);
+		
+		Acomodar(Token.SE,";","");
 	}
+
 	public ArrayList<Identificador> r(){
 		return ide;
+	}
+	private void update(String tok,String val,boolean algo,ArrayList<Token> e){
+		for (Identificador token : ide) {
+			if( token.getNombre().equals(tok)){
+				if( !algo ){
+					token.setExp(e);
+				}else{
+					token.setFaux(lin);
+					token.setExp(e);
+				}
+				return;
+			}
+		}
+	}
+	
+	private boolean buscar(String tok){
+		for (Identificador token : ide) {
+			if( token.getNombre().equals(tok))
+				return true;
+		}
+		return false;
 	}
 }

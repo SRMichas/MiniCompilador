@@ -12,6 +12,7 @@ public class Token {
 	public final static int STG = 8;
 	public final static int ID = 9;
 	public final static int EOF = 10;
+	public final static int ID_DIG = 11;
 	
 	private String desc,token;
 	private int tipo,columna,fila;

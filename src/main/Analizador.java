@@ -8,8 +8,9 @@ public class Analizador {
 	private String salida = "";
 	//private boolean algo = true;
 	private Lexer lex = new Lexer();
-	private Parser2 p;
+	private Parser p;
 	private Semantic sem;
+	public boolean muestra;
 	
 	public ArrayList<Token> retArr(){
 		return arr;
@@ -24,15 +25,17 @@ public class Analizador {
 	}
 	public String compilacion(String entrada){
 		salida = "";
+		muestra = false;
 		if( lex.lexico(entrada.toCharArray())){
 			salida += "\tNo hay errores Lexicos\n";
 			//Sintactico(componentes.inicio());
 			//p = new Parser(componentes);
 			arr = lex.retComp();
-			p = new Parser2(arr);
+			p = new Parser(arr);
 			salida += p.Sintactico();
 		}else 
 			salida = lex.salida;
+		
 		if( salida.equals("\tNo hay errores Lexicos\n") ){
 			salida += "\tNo hay errores Sintacticos\n";
 			sem = new Semantic(p.r());
@@ -41,6 +44,7 @@ public class Analizador {
 		if( salida.endsWith("Sintacticos\n")){
 			salida += "\tNo hay errores Semanticos\n"+
 					"\n\tPrograma Compilado con exito";
+			muestra = true;
 		}
 		return salida;
 	}

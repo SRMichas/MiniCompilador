@@ -15,7 +15,7 @@ import Formato.Formato;
 import main.Analizador;
 import main.Archivo;
 import main.Token;
-import main.Parser2;
+import main.Parser;
 import java.awt.BorderLayout;
 import javax.swing.JTable;
 import javax.swing.JScrollPane;
@@ -58,8 +58,8 @@ public class Ventana extends JFrame{
 	private JScrollPane jstb;
 	//Componentes Personalizados
 	private FrameAcerca FAD;
-	private TablaSimbolosEx TSE;
-	private TablaSimbolosEx2 TS;
+	private TablaTokens TSE;
+	private TablaSimbolos TS;
 	private Archivo ach;
 	private Analizador bot = new Analizador();
 	private ModeloTabla mt;
@@ -86,8 +86,8 @@ public class Ventana extends JFrame{
 	
 	private void init(){
 		JSplitPane panel3 = new JSplitPane();
-		TSE = new TablaSimbolosEx(Ventana.this, bot.retArr());		//Instancia de la tabla de simbolos extendida
-		TS = new TablaSimbolosEx2(this, bot.retArrS());
+		TSE = new TablaTokens(Ventana.this, bot.retArr());		//Instancia de la tabla de simbolos extendida
+		TS = new TablaSimbolos(this, bot.retArrS());
 		FAD = new FrameAcerca(this);					//Instancia de la ventana Acerca de
 		workSpace = new JTabbedPane();					//Instancia del contenedor del area de trabajo
 		JSplitPane panel = new JSplitPane();
@@ -347,24 +347,31 @@ public class Ventana extends JFrame{
 				}
 			}else if( obj == mnitEjecutar || obj == btnEjecutar ){
 				int d = workSpace.getSelectedIndex();						//indice de la pestaña actual
+				if( TS.isVisible())
+					TS.dispose();
 				WorkSpace ks = (WorkSpace) workSpace.getComponentAt(d);		//Determina el area de trabajo segun la pestaña actual
 				txtTrabajo = ks.getTxtTrabajo();							//...
 				if(!txtTrabajo.getText().equals("")){
 					String cs = bot.compilacion(txtTrabajo.getText());				//Obtiene una cadema con los errores lexicos en caso de haber alguno
-					txtLog.setText(Parser2.salida2);
+					txtLog.setText(Parser.salida2);
 					creaTabla(bot.retArr());									//llena la tabla de simbolos pequeña
 					jstb.setViewportView(table);
 					txtConsola.setText(cs);										//muestra los errores en caso de haber alguno
 					TSE.actCat(bot.retArr());									//llena la tabla de simbolos extendida
-					TS.actCat(bot.retArrS());
+					TS.actCat(bot.retArrS());					
 				}else
 					JOptionPane.showMessageDialog(null, "No hay texto para analizar");
 			}else if( obj == mnitTabTok){
 				TSE.isVisible(true);				//hace visible la tabla de simbolos extendida
 				TSE.actCat(bot.retArr());			//llena la tabla de simbolos extendida
 			}else if( obj == mnitTabSimb){
-				TS.isVisible(true);
-				TS.actCat(bot.retArrS());
+				if( bot.muestra ){
+					TS.isVisible(true);
+					TS.actCat(bot.retArrS());
+				}else if( txtTrabajo.getText().equals(""))
+					JOptionPane.showMessageDialog(Ventana.this, "No se a compilado nada");	
+				else
+					JOptionPane.showMessageDialog(Ventana.this, "No se puede mostrar hasta que no haya errores\no se haya compilado algo");				
 			}else if( obj == mnitAcerca){
 				FAD.setVisible(true);		//hace visible la ventana Acerca de
 			}else if( obj == mnitCopiar || obj == mnitpCopiar ){

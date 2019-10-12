@@ -12,6 +12,7 @@ public class Lexer {
 	private boolean Bandera = true;
 
 	public boolean lexico(char[] carac){
+		Bandera = true;
 		salida = "";
 		arr.clear();				//Limpia el Arragloe de los tokens
 		String token = "";
@@ -88,7 +89,7 @@ public class Lexer {
 			 token = "";			//vaciamos el token
 			 noError = false;		//lo devolvemos como al inicio
 		}
-		arr.add(new Token(Token.EOF, "\uffff", linea, columna));
+		arr.add(new Token(Token.EOF, "\uffff", columna, linea));
 		if(!salida.equals("")) Bandera = false;
 		return Bandera;
 	}
