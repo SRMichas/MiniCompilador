@@ -28,7 +28,8 @@ public class Semantic {
 			case "int":
 				exp = "(true|false|([0-9]+\\.[0-9]+f?)|(\".*\"))";
 				if( revisaRepetida(ident) ){
-					salida += "\tError Semantico, Fila: "+ident.getFila()+" la variable \""+ident.getNombre()+"\" ya esta declarada\n";
+					salida += "\tError Semantico, Fila: "+ident.getFila()+" la variable \""+ident.getNombre()+"\" ya esta declarada en la linea "+
+				ind(ident.getNombre()).getFila()+"\n";
 				}else{
 					if( ident.getValor().matches(exp)){
 						salida += "\tError Semantico, Fila: "+ident.getFila()+" \""+ident.getValor()+"\" no es un valor entero\n";
@@ -42,7 +43,8 @@ public class Semantic {
 				exp = "(true|false|(\".*\"))";
 				
 				if( revisaRepetida(ident) )
-					salida += "\tError Semantico, Fila: "+ident.getFila()+" la variable \""+ident.getNombre()+"\" ya esta declarada\n";
+					salida += "\tError Semantico, Fila: "+ident.getFila()+" la variable \""+ident.getNombre()+"\" ya esta declaradaen la linea "+
+				ind(ident.getNombre()).getFila()+"\n";
 				else
 					if(ident.getValor().matches(exp) || ident.getValor().contains("f") || !ident.getValor().contains("."))
 						salida += "\tError Semantico, Fila: "+ident.getFila()+" \""+ident.getValor()+"\" no es un valor double\n";
@@ -54,7 +56,8 @@ public class Semantic {
 			case "boolean":
 				
 				if( revisaRepetida(ident) )
-					salida += "\tError Semantico, Fila: "+ident.getFila()+" la variable \""+ident.getNombre()+"\" ya esta declarada\n";
+					salida += "\tError Semantico, Fila: "+ident.getFila()+" la variable \""+ident.getNombre()+"\" ya esta declaradaen la linea "+
+				ind(ident.getNombre()).getFila()+"\n";
 				else 
 					if(!ident.getValor().matches("(false|true)")){ //tipo correcto de dato
 						salida += "\tError Semantico, Fila: "+ident.getFila()+" \""+ident.getValor()+"\" no es un valor booleano\n";
@@ -66,12 +69,14 @@ public class Semantic {
 					salida += "\tError Semantico, Fila: "+ident.getFila()+" \""+ident.getValor()+"\" no es una Cadena\n";
 				}
 				if( revisaRepetida(ident) )
-					salida += "\tError Semantico, Fila: "+ident.getFila()+" la variable \""+ident.getNombre()+"\" ya esta declarada\n";
+					salida += "\tError Semantico, Fila: "+ident.getFila()+" la variable \""+ident.getNombre()+"\" ya esta declarada en la linea "+
+				ind(ident.getNombre()).getFila()+"\n";
 				break;
 			case "float":
 				
 				if( revisaRepetida(ident) )
-					salida += "\tError Semantico, Fila: "+ident.getFila()+" la variable \""+ident.getNombre()+"\" ya esta declarada\n";
+					salida += "\tError Semantico, Fila: "+ident.getFila()+" la variable \""+ident.getNombre()+"\" ya esta declarada en la linea "+
+				ind(ident.getNombre()).getFila()+"\n";
 				else
 					if( !ident.getValor().contains(".") && !ident.getValor().contains("f"))
 						salida += "\tError Semantico, Fila: "+ident.getFila()+" \""+ident.getValor()+"\" no es un valor flotante\n";
@@ -127,7 +132,7 @@ public class Semantic {
 				if( revisaDeclarada(t.getToken()) )
 					//salida += "\tError Semantico, Fila: "+t.getFila()+" la variable \""+t.getToken()+"\" no ESTA declarada\n";
 				{
-					Identificador id = ind(t.getToken(), 0, null);
+					Identificador id = ind(t.getToken());
 					//String pre = id.getAux().get(id.getAux().size() - 1);
 					
 					
@@ -255,7 +260,7 @@ public class Semantic {
 		}
 		return res;
 	}
-	private Identificador ind(String nom,int t,Identificador id){
+	private Identificador ind(String nom){
 		for (Identificador identificador : ide) {
 			if (identificador.getNombre().equals(nom))
 				return identificador;

@@ -6,7 +6,14 @@ import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.AttributeSet;
 import javax.swing.text.Element;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyleContext;
+import javax.swing.text.StyledDocument;
+import javax.swing.text.TabSet;
+import javax.swing.text.TabStop;
 
 import Formato.Documento;
 import main.Archivo;
@@ -23,6 +30,13 @@ public class WorkSpace extends JScrollPane{
 	
 	public WorkSpace(Ventana jf) {
 		arc = new Archivo();
+		
+		taLineas = new JTextPane();
+		taLineas.setBorder(new MatteBorder(0, 0, 0, 1, (Color) new Color(0, 0, 0)));
+		taLineas.setEditable(false);
+		taLineas.setFont(new Font("Consolas", Font.PLAIN, 16));
+		setRowHeaderView(taLineas);
+		
 		Documento docc = new Documento();
 		
 		txtTrabajo = new JTextPane(docc);
@@ -67,13 +81,15 @@ public class WorkSpace extends JScrollPane{
 			}
  
 		});
+		/*TabStop[] stops = new TabStop[1];
+		stops[0] = new TabStop(60,TabStop.ALIGN_LEFT,TabStop.LEAD_NONE);
+		TabSet tSet = new TabSet(stops);
+		AttributeSet aset = StyleContext.getDefaultStyleContext()
+				.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.TabSet, tSet);
+		txtTrabajo.setParagraphAttributes(aset, false);*/
 		setViewportView(txtTrabajo);
 		
-		taLineas = new JTextPane();
-		taLineas.setBorder(new MatteBorder(0, 0, 0, 1, (Color) new Color(0, 0, 0)));
-		taLineas.setEditable(false);
-		taLineas.setFont(new Font("Consolas", Font.PLAIN, 16));
-		setRowHeaderView(taLineas);
+		
 	}
 
 	public JTextPane getTxtTrabajo() {
