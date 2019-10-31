@@ -1,11 +1,11 @@
 package main;
 
 public class Token {
-	public final static int PR=0;
+	public final static int PR = 0;
 	public final static int SE = 1;
 	public final static int OPL = 2;
 	public final static int OPA = 3;
-	public final static int TIPO  = 4;
+	public final static int TIPO = 4;
 	public final static int MOD = 5;
 	public final static int DIG = 6;
 	public final static int VAL = 7;

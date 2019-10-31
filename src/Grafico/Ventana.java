@@ -47,7 +47,7 @@ public class Ventana extends JFrame{
 	private static final long serialVersionUID = 1L;
 	//Componentes Nativos
 	private JTable table;
-	private JTextPane txtTrabajo,txtConsola,txtLog;
+	private JTextPane txtTrabajo,txtConsola,txtLog,txtTriplos;
 	JLabel lbColumna,lbLinea;
 	private JMenuItem mnitNuevo,mnitGuardar,mnitAbrir,mnitSalir,mnitEjecutar,mnitAcerca;
 	private JMenuItem mnitCopiar,mnitPegar,mnitCortar;
@@ -56,6 +56,7 @@ public class Ventana extends JFrame{
 	private JButton btnNuevo,btnGuardar,btnEjecutar;
 	private JTabbedPane workSpace;
 	private JScrollPane jstb;
+	private JTabbedPane tpConsola;
 	//Componentes Personalizados
 	private FrameAcerca FAD;
 	private TablaTokens TSE;
@@ -115,8 +116,14 @@ public class Ventana extends JFrame{
 		txtConsola.setFont(new Font("Consolas", Font.PLAIN, 13));
 		txtConsola.setEditable(false);
 		JScrollPane jscc = new JScrollPane(txtConsola);
-		JTabbedPane tpConsola = new JTabbedPane(JTabbedPane.TOP);
+		txtTriplos = new JTextPane();
+		txtTriplos.setFont(new Font("Consolas", Font.PLAIN, 16));
+		txtTriplos.setText("\n\tNada de mostrar");
+		txtTriplos.setEditable(false);
+		JScrollPane jsct = new JScrollPane(txtTriplos);
+		tpConsola = new JTabbedPane(JTabbedPane.TOP);
 		tpConsola.addTab("Consola",new ImageIcon(Ventana.class.getResource("/Imagenes/consola-16.png")),jscc);
+		tpConsola.addTab("Triplo", jsct);
 		panel3.setLeftComponent(tpConsola);
 		panel.setBottomComponent(panel3);
 		
@@ -358,7 +365,13 @@ public class Ventana extends JFrame{
 					jstb.setViewportView(table);
 					txtConsola.setText(cs);										//muestra los errores en caso de haber alguno
 					TSE.actCat(bot.retArr());									//llena la tabla de simbolos extendida
-					TS.actCat(bot.retArrS());					
+					TS.actCat(bot.retArrS());	
+					if( bot.muestra ){
+						if( !bot.retMensaje().equals("") ){
+							tpConsola.setTitleAt(1, "*Triplo");
+							txtTriplos.setText(bot.retMensaje());
+						}
+					}
 				}else
 					JOptionPane.showMessageDialog(null, "No hay texto para analizar");
 			}else if( obj == mnitTabTok){

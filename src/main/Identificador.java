@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Identificador {
 	
-	private String nombre,tipo,valor;
+	private String nombre,tipo,valor,alcance;
 	private int fila,faux;
 	private ArrayList<Token> exp;
 	public Identificador(String n, String t,String v,int f,int fa){
@@ -12,6 +12,9 @@ public class Identificador {
 	}
 	public Identificador(String n, String t,String v,int f){
 		nombre = n; tipo = t; valor = v; fila = f;
+	}
+	public Identificador(String n, String t,String v,int f,String al){
+		nombre = n; tipo = t; valor = v; fila = f; alcance = al;
 	}
 	public String getNombre() {
 		return nombre;
@@ -49,7 +52,12 @@ public class Identificador {
 	public void setExp(ArrayList<Token> e){
 		exp = e;
 	}
-	
+	public String getAlcance() {
+		return alcance;
+	}
+	public void setAlcance(String alcance) {
+		this.alcance = alcance;
+	}
 		
 	
 }

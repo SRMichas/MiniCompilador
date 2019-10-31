@@ -14,6 +14,7 @@ public class Parser {
 	private ArrayList<Identificador> ide;
 	private final static int sinValor = 30,exceso = 31;
 	private short lin;
+	private boolean algo = false;
 	public Parser(ArrayList<Token >c){
 		compo = c;
 		cp = compo.get(idx);
@@ -105,7 +106,10 @@ public class Parser {
 				salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un operador logico\n";
 			break;
 		case Token.OPA:
-			salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un operador aritmetico\n";
+			/*if( to != null || to.length()> 0)
+				salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un operador aritmetico\n";
+			else*/
+				salida +="\tError Sintactico, Fila: "+cp.getFila()+" el token \""+cp.getToken()+"\" no es un operador aritmetico\n";
 			break;
 		case Token.TIPO:
 			salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un \"int\" o \"boolean\"\n";
@@ -126,16 +130,20 @@ public class Parser {
 					salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un identificador\n";
 			break;
 		case Token.ID_DIG:
-			salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un identificador o un Digito\n";
+			/*if( to != null && to.length()> 0)
+				salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un identificador o un Digito\n";
+			else*/
+				salida +="\tError Sintactico, Fila: "+cp.getFila()+" el token \""+cp.getToken()+"\" no es un identificador o un Digito\n";
 			break;
 		case sinValor:
 			salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un valor numerico o booleano o una cadena\n";
 			break;
 		case exceso:
-			salida += "\tError Sintactico, Fila: "+cp.getFila()+" \""+to+"\" no concuerda con la gramatica\n";
+			salida += "\tError Sintactico, Fila: "+cp.getFila()+" \""+cp.getToken()+"\" no concuerda con la gramatica\n";
 			break;
-
-
+		default:
+			salida += "\tError Sintactico, Fila: "+cp.getFila()+" "+to+"\n";
+			break;
 		}
 		salida2 += "Token obtenido:"+cp.getToken()+"\n"+"Token Esperado: "+to+"\n-------------------------------------------\n";
 		
@@ -155,7 +163,7 @@ public class Parser {
 		c2 = ID();
 		id = c2.getToken();
 		if( id != null )
-			ide.add(new Identificador(id, clss, null, c2.getFila()/*,-1*/));
+			ide.add(new Identificador(id, "-", "-", c2.getFila(),"Global"));
 		c = cp;
 		Acomodar(Token.SE,"{","");
 		
@@ -185,7 +193,7 @@ public class Parser {
 			if( Acomodar(Token.PR, "void","main") )
 				ty = "void";
 			if( Acomodar(Token.ID,"main","(") && ty != null){
-				ide.add(new Identificador("main", ty, "", compo.get(idx-1).getFila()/*,-1*/));
+				ide.add(new Identificador("main", "-", "", compo.get(idx-1).getFila(),"Global"));
 			}
 			Acomodar(Token.SE, "(",")");
 			Acomodar(Token.SE,")","{");
@@ -202,17 +210,19 @@ public class Parser {
 		} catch (IndexOutOfBoundsException e) {
 			caux = new Token(-1, "", -1, -1);
 		}
+		algo = false;
 		if((c.getTipo() == Token.MOD || c.getTipo() == Token.TIPO) && caux.getTipo() != Token.PR){
 			VDN();
 			c = cp;
 			Acomodar(Token.SE,";","public");
 		}
+		algo = true;
 	}
 	private void VDN(){
 		//conDV++;
 		Token c= null,c2;
 		c = cp;
-		String ty = null ,nom = null, val = null;
+		String ty = null ,nom = null, val = null,alcance;
 		if(c.getTipo() != Token.TIPO)
 			M();
 		ty = T();
@@ -232,9 +242,18 @@ public class Parser {
 			case "double": 	val = "0.0"; break;
 			case "float": 	val = "0.0f"; break;
 			}
-			ide.add(new Identificador(nom, ty, val, c2.getFila()/*,-1*/));
-		}else if( val != null)
-			ide.add(new Identificador(nom, ty, val, c2.getFila()/*,-1*/));
+			if( !algo )
+				alcance = "Global";
+			else
+				alcance = "Local";
+			ide.add(new Identificador(nom, ty, val, c2.getFila(),alcance));
+		}else if( val != null){
+			if( !algo )
+				alcance = "Global";
+			else
+				alcance = "Local";
+			ide.add(new Identificador(nom, ty, val, c2.getFila(),alcance));
+		}
 		//contador ++;
 	}
 	private String VDR(){
@@ -313,6 +332,9 @@ public class Parser {
 		}else if(c.getTipo() == Token.MOD || c.getTipo() == Token.TIPO){
 			VDN();
 			Acomodar(Token.SE, ";", "");
+			S();
+		}else if( c.getTipo() == Token.ID){
+			AE2();
 			S();
 		}
 	}
@@ -522,26 +544,166 @@ public class Parser {
 		Acomodar(Token.SE,";","");
 	}
 
+	private void AE2(){
+		Token c,res;
+		int type = -1;
+		c = cp;
+		String nom = null, val1 = null, op = null , val2 = null;
+		ArrayList<Token> exp = new ArrayList<>();
+		res = ID();
+		if( res != null)
+			nom = res.getToken();
+		short ind = 0;
+		boolean caca = false,caca2 = false,simple = true;
+		ArrayList<Integer> pos = new ArrayList<>();
+		
+		if( nom != null){
+			if( !buscar(nom)){
+				ide.add(new Identificador(nom, "", "", res.getFila()/*,-1*/));
+				ind = (short) (ide.size() - 1);
+				caca = true;
+			}
+			
+		}
+		
+		Acomodar(Token.SE,"=","");
+		c = cp;
+		if(c.getTipo() == Token.DIG){
+			if( c.getToken().contains(".") && c.getToken().contains("f")){
+				res = FTL();
+				val1 = res.getToken();
+			}else if( c.getToken().contains(".")){
+				res = DBL();
+				val1 = res.getToken();
+			}else{
+				res = IL();
+				val1 = res.getToken();
+			}
+		}else if( c.getTipo() == Token.ID){
+			res = ID();
+			
+			if( res != null)
+				val1 = res.getToken();
+			
+			if( val1 != null )
+				if( !buscar(val1))
+					if( !nom.equals(val1) )
+						ide.add(new Identificador(val1, "", "", res.getFila()/*,-1*/));
+					else
+						caca2 = true;
+				else
+					caca2 = true;
+		}else
+			error(Token.ID_DIG, "DIG/ID");
+		
+		/*pos.add((int)lin);
+		exp.add(res);*/
+		exp.add(res);
+		c = cp;
+		type = c.getTipo();
+		while( !c.getToken().equals(";") ){
+			simple = false;
+			if( c.getToken().matches("[\\+|[-]|/|\\*]")){
+				op = cp.getToken();
+				pos.add(cp.getFila());
+				exp.add(c);
+				Avanza();
+			}else{
+				error(Token.OPA, "arit");
+				Avanza();
+				break;
+			}
+			c = cp;
+			type = c.getTipo();
+			switch (type) {
+			case Token.DIG:
+				if( c.getToken().contains(".") && c.getToken().contains("f")){
+					res = FTL();
+					val2 = res.getToken();	
+				}else if( c.getToken().contains(".")){
+					res = DBL();
+					val2 = res.getToken();
+				}else{
+					res = IL();
+					val2 = res.getToken();
+				}
+				break;
+			case Token.ID:
+				res = ID();
+				if( res != null)
+					val2 = res.getToken();
+				if( val2 != null)
+					if( !buscar(val2))
+						if( !nom.equals(val2) )
+							ide.add(new Identificador(val2, "", "", res.getFila()/*,-1*/));
+						else
+							caca2 = true;
+					else
+						caca2 = true;
+				break;
+				default:
+					error(Token.ID_DIG,"DIG/ID");
+					Avanza();
+					break;
+			}
+			exp.add(res);
+			c = cp;
+			type = c.getTipo();
+		}
+		c = cp;
+		//update(nom, val1, true, exp);
+		/*if( simple ){
+			if( res.getTipo() == Token.DIG)*/
+				
+		//}
+		/*pos.add((int)lin);
+		exp.add(res);*/
+		if( val1 != null && op != null && val2 != null){
+			if( caca ){
+				ide.get(ind).setExp(exp);
+			}else if( nom != null)
+				update(nom, val1+op+val2,caca2,exp);
+		}
+			
+		
+		Acomodar(Token.SE,";","");
+	}
+	
 	public ArrayList<Identificador> r(){
 		return ide;
 	}
 	private void update(String tok,String val,boolean algo,ArrayList<Token> e){
 		for (Identificador token : ide) {
 			if( token.getNombre().equals(tok)){
-				if( !algo ){
-					token.setExp(e);
+				if( e.size() != 1){
+					if( !algo ){
+						token.setExp(e);
+					}else{
+						token.setFaux(lin);
+						token.setExp(e);
+					}
 				}else{
-					token.setFaux(lin);
-					token.setExp(e);
+					Token t = e.get(0);
+					if( t.getTipo() != Token.ID)
+						token.setValor(val);
 				}
+				
 				return;
 			}
 		}
 	}
+	private Object retTipo(String str){
+		if( str.contains("f"))
+			return Float.parseFloat(str);
+		else if ( str.contains("."))
+			return Double.parseDouble(str);
+		else
+			return Integer.parseInt(str);
+	}
 	
 	private boolean buscar(String tok){
 		for (Identificador token : ide) {
-			if( token.getNombre().equals(tok))
+ 			if( token.getNombre().equals(tok))
 				return true;
 		}
 		return false;

@@ -8,4 +8,4 @@ public class Vaja {
 		new Ventana();
 	}
 
-}
+} 

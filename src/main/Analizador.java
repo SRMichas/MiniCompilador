@@ -5,24 +5,27 @@ import java.util.ArrayList;
 public class Analizador {
 	
 	private ArrayList<Token> arr = new ArrayList<>();
-	private String salida = "";
+	private ArrayList<Identificador> tablaSimbolos;
+	private String salida = "",mensaje = "";
 	//private boolean algo = true;
 	private Lexer lex = new Lexer();
 	private Parser p;
-	private Semantic sem;
+	private Semantic2 sem;
 	public boolean muestra;
 	
 	public ArrayList<Token> retArr(){
 		return arr;
 	}
 	public ArrayList<Identificador> retArrS(){
-		try {
+		/*try {
 			return p.r();
 		} catch (NullPointerException e) {
 			return new ArrayList<Identificador>(0);
-		}
+		}*/
+		return tablaSimbolos;
 		
 	}
+	public String retMensaje(){ return mensaje; }
 	public String compilacion(String entrada){
 		salida = "";
 		muestra = false;
@@ -38,13 +41,19 @@ public class Analizador {
 		
 		if( salida.equals("\tNo hay errores Lexicos\n") ){
 			salida += "\tNo hay errores Sintacticos\n";
-			sem = new Semantic(p.r());
+			sem = new Semantic2(p.r());
 			salida += sem.Semantico();
 		}
-		if( salida.endsWith("Sintacticos\n")){
+		if( salida.contains("No hay errores Sintacticos")){
 			salida += "\tNo hay errores Semanticos\n"+
 					"\n\tPrograma Compilado con exito";
 			muestra = true;
+			Triplo trip = new Triplo(p.r());
+			trip.algo();
+			mensaje = trip.retMensaje();
+			//System.out.println(mensaje);
+			tablaSimbolos = trip.retTabla();
+			System.out.println(mensaje);
 		}
 		return salida;
 	}

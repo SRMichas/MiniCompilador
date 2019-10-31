@@ -7,7 +7,7 @@ import main.Identificador;
 public class ModeloTabla2 extends AbstractTableModel{
 
 	private static final long serialVersionUID = 1L;
-	private String[] titulo ={"Nombre","Tipo","Valor","Posicion"};
+	private String[] titulo ={"Nombre","Tipo","Valor","Posicion","Alcance"};
 	private ArrayList<Identificador> ide;
 
 	public ModeloTabla2(ArrayList<Identificador> id){
@@ -36,6 +36,15 @@ public class ModeloTabla2 extends AbstractTableModel{
 		case 1: val = id.getTipo();  break;
 		case 2: val = id.getValor(); break;
 		case 3: val = id.getFila(); break;
+		case 4: val = id.getAlcance(); break;
+		/*case 5: 
+			try {
+				val = id.getExp().size();
+			} catch (Exception e) {
+				// TODO: handle exception
+				val = "-";
+			}
+			 break;*/
 		}
 		return val;
 	}
