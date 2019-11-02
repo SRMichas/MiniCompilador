@@ -47,7 +47,7 @@ public class Ventana extends JFrame{
 	private static final long serialVersionUID = 1L;
 	//Componentes Nativos
 	private JTable table;
-	private JTextPane txtTrabajo,txtConsola,txtLog,txtTriplos;
+	private JTextPane txtTrabajo,txtConsola,txtLog,txtCuadruplo;
 	JLabel lbColumna,lbLinea;
 	private JMenuItem mnitNuevo,mnitGuardar,mnitAbrir,mnitSalir,mnitEjecutar,mnitAcerca;
 	private JMenuItem mnitCopiar,mnitPegar,mnitCortar;
@@ -116,14 +116,14 @@ public class Ventana extends JFrame{
 		txtConsola.setFont(new Font("Consolas", Font.PLAIN, 13));
 		txtConsola.setEditable(false);
 		JScrollPane jscc = new JScrollPane(txtConsola);
-		txtTriplos = new JTextPane();
-		txtTriplos.setFont(new Font("Consolas", Font.PLAIN, 16));
-		txtTriplos.setText("\n\tNada de mostrar");
-		txtTriplos.setEditable(false);
-		JScrollPane jsct = new JScrollPane(txtTriplos);
+		txtCuadruplo = new JTextPane();
+		txtCuadruplo.setFont(new Font("Consolas", Font.PLAIN, 16));
+		txtCuadruplo.setText("\n\tNada de mostrar");
+		txtCuadruplo.setEditable(false);
+		JScrollPane jsct = new JScrollPane(txtCuadruplo);
 		tpConsola = new JTabbedPane(JTabbedPane.TOP);
 		tpConsola.addTab("Consola",new ImageIcon(Ventana.class.getResource("/Imagenes/consola-16.png")),jscc);
-		tpConsola.addTab("Triplo", jsct);
+		tpConsola.addTab("Cuadruplo", jsct);
 		panel3.setLeftComponent(tpConsola);
 		panel.setBottomComponent(panel3);
 		
@@ -368,8 +368,8 @@ public class Ventana extends JFrame{
 					TS.actCat(bot.retArrS());	
 					if( bot.muestra ){
 						if( !bot.retMensaje().equals("") ){
-							tpConsola.setTitleAt(1, "*Triplo");
-							txtTriplos.setText(bot.retMensaje());
+							tpConsola.setTitleAt(1, "*Cuadruplo");
+							txtCuadruplo.setText(bot.retMensaje());
 						}
 					}
 				}else

@@ -20,22 +20,23 @@ public class Semantic {
 			
 			switch (ident.getTipo()) {
 			case "":
-				//if( !revisaDeclarada(ident.getNombre()))
 					salida += "\t1st - Error Semantico, Fila: "+ident.getFila()+" la variable \""+ident.getNombre()+"\" no esta declarada\n";
-				if( ident.getExp() != null)
-					ident.setValor(""+resultado2(ident));
+					/*if( ident.getExp() != null)
+						ident.setValor(""+resultado2(ident));*/
+					if( ident.getExp() != null)
+						verificaExp(ident);
 				break;
 			case "int":
 				exp = "(true|false|([0-9]+\\.[0-9]+f?)|(\".*\"))";
 				if( revisaRepetida(ident) ){
-					salida += "\tError Semantico, Fila: "+ident.getFila()+" la variable \""+ident.getNombre()+"\" ya esta declarada en la linea "+
-				ind(ident.getNombre()).getFila()+"\n";
+					salida += "\tError Semantico, Fila: "+ident.getFila()+" la variable \""+ident.getNombre()+"\" ya esta declarada en la linea "
+							+ind(ident.getNombre()).getFila()+"\n";
 				}else{
 					if( ident.getValor().matches(exp)){
 						salida += "\tError Semantico, Fila: "+ident.getFila()+" \""+ident.getValor()+"\" no es un valor entero\n";
 					}else{
 						if( ident.getExp() != null)
-							ident.setValor(""+resultado2(ident));
+							verificaExp(ident);
 					}
 				}
 				break;
@@ -50,7 +51,20 @@ public class Semantic {
 						salida += "\tError Semantico, Fila: "+ident.getFila()+" \""+ident.getValor()+"\" no es un valor double\n";
 					else{
 						if( ident.getExp() != null)
-							ident.setValor(""+resultado2(ident));
+							verificaExp(ident);
+					}
+				break;
+			case "float":
+				
+				if( revisaRepetida(ident) )
+					salida += "\tError Semantico, Fila: "+ident.getFila()+" la variable \""+ident.getNombre()+"\" ya esta declarada en la linea "+
+				ind(ident.getNombre()).getFila()+"\n";
+				else
+					if( !ident.getValor().contains(".") && !ident.getValor().contains("f"))
+						salida += "\tError Semantico, Fila: "+ident.getFila()+" \""+ident.getValor()+"\" no es un valor flotante\n";
+					else{
+						if( ident.getExp() != null)
+							verificaExp(ident);
 					}
 				break;
 			case "boolean":
@@ -71,19 +85,6 @@ public class Semantic {
 				if( revisaRepetida(ident) )
 					salida += "\tError Semantico, Fila: "+ident.getFila()+" la variable \""+ident.getNombre()+"\" ya esta declarada en la linea "+
 				ind(ident.getNombre()).getFila()+"\n";
-				break;
-			case "float":
-				
-				if( revisaRepetida(ident) )
-					salida += "\tError Semantico, Fila: "+ident.getFila()+" la variable \""+ident.getNombre()+"\" ya esta declarada en la linea "+
-				ind(ident.getNombre()).getFila()+"\n";
-				else
-					if( !ident.getValor().contains(".") && !ident.getValor().contains("f"))
-						salida += "\tError Semantico, Fila: "+ident.getFila()+" \""+ident.getValor()+"\" no es un valor flotante\n";
-					else{
-						if( ident.getExp() != null)
-							ident.setValor(""+resultado2(ident));
-					}
 				break;
 			}
 		}
@@ -121,144 +122,67 @@ public class Semantic {
 		return false;
 	}
 	
-	private Object resultado2(Identificador val){
-		Object res = null;
-		String op = "",valo = "";
-		ArrayList<Token> arrcaca = val.getExp();
-		Object aux1 = null, aux2 = null;
-		short vel = 1,ty1 = 0, ty2 = 0;
-		for (Token t: arrcaca) {
-			if( t.getTipo() == Token.ID ){
-				if( revisaDeclarada(t.getToken()) )
-					//salida += "\tError Semantico, Fila: "+t.getFila()+" la variable \""+t.getToken()+"\" no ESTA declarada\n";
-				{
-					Identificador id = ind(t.getToken());
-					//String pre = id.getAux().get(id.getAux().size() - 1);
-					
-					
- 					if( !id.getTipo().equals(val.getTipo()))
-						//salida += "\tError Semantico, Fila: "+t.getFila()+" la variable \""+t.getToken()+"\" no ESTA declarada\n";
-						salida += "\tError Semantico, Fila: "+t.getFila()+" la variable \""+t.getToken()+"\" y \""+val.getNombre()+"\" no son de los mismos tipos\n";
-					else{
-						valo = id.getValor();
-						
-						switch (id.getTipo()) {
-						case "float":
-							if( vel == 1){
-								aux1 = Float.parseFloat(valo);
-								ty1 = 1;
-							}else if( vel == 3){
-								aux2 = Float.parseFloat(valo);
-								ty2 = 1;
-							}
-							break;
-						case "double":
-							if( vel == 1 ){
-								aux1 = Double.parseDouble(valo);
-								ty1 = 2;
-							}else if( vel == 3){
-								aux2 = Double.parseDouble(valo);
-								ty2 = 2;
-							}
-							break;
-						case "int":
-							if( vel == 1){
-								aux1 = Integer.parseInt(valo);
-								ty1 = 3;
-							}else if( vel == 3){
-								aux2 = Integer.parseInt(valo);
-								ty2 = 3;
-							}
-							break;
-						}
-					}	
+	public boolean verificaExp(Identificador ide){
+		boolean valido = true;
+		ArrayList<Token> expre = ide.getExp();
+		String valo;
+		for (Token tok: expre) {
+			if( tok.getTipo() == Token.ID ){
+				if( revisaDeclarada(tok.getToken())){
+					Identificador id = ind(tok.getToken());
+					if( !id.getTipo().equals(ide.getTipo())){
+						salida += "\tError Semantico, Fila: "+tok.getFila()+" la variable \""+tok.getToken()+"\" y \""+ide.getNombre()+"\" no son de los mismos tipos\n";
+						valido = false;
+					}
 				}
-			}else if(t.getTipo() == Token.DIG){
-				valo = t.getToken();
-				if(valo.contains(".")){
-					if( valo.contains("f")){
-						if( val.getTipo().equals("float")){
-							if( vel == 1){
-								aux1 = Float.parseFloat(valo);
-								ty1 = 1;
-							}else if( vel == 3 ){
-								aux2 = Float.parseFloat(valo);
-								ty2 = 1;
-							}
-						}else
-							salida += "\tError Semantico, Fila: "+t.getFila()+" el dato \""+t.getToken()+"\" no es tipo \" "+val.getTipo()+"\"\n";
-					}else{
-						if( val.getTipo().equals("double")){
-							if( vel == 1){
-								aux1 = Double.parseDouble(valo);
-								ty1 = 2;
-							}else if( vel == 3 ){
-								aux2 = Double.parseDouble(valo);
-								ty2 = 2;
-							}
-						}else
-							salida += "\tError Semantico, Fila: "+t.getFila()+" el dato \""+t.getToken()+"\" no es tipo \""+val.getTipo()+"\"\n";
+			}else if( tok.getTipo() == Token.DIG ){
+				valo = tok.getToken();
+				if( valo.contains(".")){
+					if( valo.contains("f") && !ide.getTipo().equals("float")){
+						salida += "\tError Semantico, Fila: "+tok.getFila()+" el dato \""+tok.getToken()+"\" no es tipo \" "+ide.getTipo()+"\"\n";
+						valido = false;
+					}else if( valo.contains("f") && !ide.getTipo().equals("double")){
+						salida += "\tError Semantico, Fila: "+tok.getFila()+" el dato \""+tok.getToken()+"\" no es tipo \""+ide.getTipo()+"\"\n";
+						valido = false;
 					}
 				}else{
-					if( val.getTipo().equals("int")){
-						if( vel == 1){
-							aux1 = Integer.parseInt(valo);
-							ty1 = 3;
-						}else if( vel == 3 ){
-							aux2 = Integer.parseInt(valo);
-							ty2 = 3;
+					if( !ide.getTipo().equals("int")){
+						salida += "\tError Semantico, Fila: "+tok.getFila()+" el dato \""+tok.getToken()+"\" no es Entero\n";
+						valido = false;
+					}
+				}
+			}
+		}
+			/*if( tok.getTipo() == Token.ID){
+				if( revisaDeclarada(tok.getToken())){
+					Identificador id = ind(t.getToken());
+					if( !id.getTipo().equals(val.getTipo())){
+						salida += "\tError Semantico, Fila: "+t.getFila()+" la variable \""+t.getToken()+"\" y \""+val.getNombre()+"\" no son de los mismos tipos\n";
+						valido = false;
 						}
-					}else
+					}
+				}
+				--if(){
+					if(){
+
+					}
+				}else if(){
+
+				}--
+			}else if( tok.getToken() == Token.DIG){
+				valo = tok.getToken();
+				if( valo.contains(".")){
+					if( valo.contains("f") && !tok.getTipo().equals("float") )
+						salida += "\tError Semantico, Fila: "+t.getFila()+" el dato \""+t.getToken()+"\" no es tipo \" "+val.getTipo()+"\"\n";
+					else if( valo.contains("f") && !tok.getTipo.equals("double"))
+						salida += "\tError Semantico, Fila: "+t.getFila()+" el dato \""+t.getToken()+"\" no es tipo \""+val.getTipo()+"\"\n";
+				}else{
+					if( !val.getTipo().equals("int") )
 						salida += "\tError Semantico, Fila: "+t.getFila()+" el dato \""+t.getToken()+"\" no es Entero\n";
-				}	
-			}else if(t.getTipo() == Token.OPA){
-				op = t.getToken();
+				}
 			}
-			
-			valo = "";
-			vel++;
-		}
-		if( ty1 == ty2 ){
-			switch (ty1) {
-			case 1:
-				switch (op) {
-				case "+": res = (float)aux1 + (float)aux2;
-					break;
-				case "-": res = (float)aux1 - (float)aux2;			
-					break;
-				case "*": res = (float)aux1 * (float)aux2;
-					break;
-				case "/": res = (float)aux1 / (float)aux2;
-					break;
-				}
-				break;
-			case 2:
-				switch (op) {
-				case "+": res = (double)aux1 + (double)aux2;
-					break;
-				case "-": res = (double)aux1 - (double)aux2;			
-					break;
-				case "*": res = (double)aux1 * (double)aux2;
-					break;
-				case "/": res = (double)aux1 / (double)aux2;
-					break;
-				}
-				break;
-			case 3:
-				switch (op) {
-				case "+": res = (int)aux1 + (int)aux2;
-					break;
-				case "-": res = (int)aux1 - (int)aux2;			
-					break;
-				case "*": res = (int)aux1 * (int)aux2;
-					break;
-				case "/": res = (int)aux1 / (int)aux2;
-					break;
-				}
-				break;
-			}
-		}
-		return res;
+		}*/
+		return valido;
 	}
 	private Identificador ind(String nom){
 		for (Identificador identificador : ide) {

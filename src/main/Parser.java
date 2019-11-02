@@ -9,8 +9,6 @@ public class Parser {
 	String salida = "";
 	public static String salida2 ="";
 	private int idx = 0;
-	//private int contador = 0,conIF = 0,conDV = 0;
-	//private boolean /*imprime,avanza = false,*/ideC = false;
 	private ArrayList<Identificador> ide;
 	private final static int sinValor = 30,exceso = 31;
 	private short lin;
@@ -48,14 +46,11 @@ public class Parser {
 		salida2 += "Token obtenido:"+cp.getToken()+"\n"+"Token Esperado: "+cp.getToken()+"\n-------------------------------------------\n";
 		if(idx < compo.size() - 1) idx++;
 		try {
-			/*if(cp.getTipo() == Token.ID) ideC = true;
-			else ideC = false;*/
 			cp = compo.get(idx);
 		} catch (IndexOutOfBoundsException e) {
 			idx--;
 			Token caux = compo.get(idx);
 			cp = new Token(19, "", caux.getColumna(), caux.getFila());
-			//error(tipo,s);
 		}
 	}
 	private void error(int t,String to){
@@ -106,10 +101,7 @@ public class Parser {
 				salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un operador logico\n";
 			break;
 		case Token.OPA:
-			/*if( to != null || to.length()> 0)
-				salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un operador aritmetico\n";
-			else*/
-				salida +="\tError Sintactico, Fila: "+cp.getFila()+" el token \""+cp.getToken()+"\" no es un operador aritmetico\n";
+			salida +="\tError Sintactico, Fila: "+cp.getFila()+" el token \""+cp.getToken()+"\" no es un operador aritmetico\n";
 			break;
 		case Token.TIPO:
 			salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un \"int\" o \"boolean\"\n";
@@ -130,10 +122,7 @@ public class Parser {
 					salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un identificador\n";
 			break;
 		case Token.ID_DIG:
-			/*if( to != null && to.length()> 0)
-				salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un identificador o un Digito\n";
-			else*/
-				salida +="\tError Sintactico, Fila: "+cp.getFila()+" el token \""+cp.getToken()+"\" no es un identificador o un Digito\n";
+			salida +="\tError Sintactico, Fila: "+cp.getFila()+" el token \""+cp.getToken()+"\" no es un identificador o un Digito\n";
 			break;
 		case sinValor:
 			salida +="\tError Sintactico, Fila: "+cp.getFila()+" se esperaba un valor numerico o booleano o una cadena\n";
@@ -554,7 +543,7 @@ public class Parser {
 		if( res != null)
 			nom = res.getToken();
 		short ind = 0;
-		boolean caca = false,caca2 = false,simple = true;
+		boolean caca = false,caca2 = false;
 		ArrayList<Integer> pos = new ArrayList<>();
 		
 		if( nom != null){
@@ -602,7 +591,7 @@ public class Parser {
 		c = cp;
 		type = c.getTipo();
 		while( !c.getToken().equals(";") ){
-			simple = false;
+			//simple = false;
 			if( c.getToken().matches("[\\+|[-]|/|\\*]")){
 				op = cp.getToken();
 				pos.add(cp.getFila());
@@ -658,12 +647,13 @@ public class Parser {
 		//}
 		/*pos.add((int)lin);
 		exp.add(res);*/
-		if( val1 != null && op != null && val2 != null){
+		
+		//DESBORRAR if( val1 != null && op != null && val2 != null){
 			if( caca ){
 				ide.get(ind).setExp(exp);
 			}else if( nom != null)
 				update(nom, val1+op+val2,caca2,exp);
-		}
+		//DESBORRAR }
 			
 		
 		Acomodar(Token.SE,";","");
@@ -675,18 +665,12 @@ public class Parser {
 	private void update(String tok,String val,boolean algo,ArrayList<Token> e){
 		for (Identificador token : ide) {
 			if( token.getNombre().equals(tok)){
-				if( e.size() != 1){
 					if( !algo ){
 						token.setExp(e);
 					}else{
-						token.setFaux(lin);
+						//token.setFaux(lin);
 						token.setExp(e);
 					}
-				}else{
-					Token t = e.get(0);
-					if( t.getTipo() != Token.ID)
-						token.setValor(val);
-				}
 				
 				return;
 			}

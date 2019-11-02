@@ -2,14 +2,14 @@ package main;
 
 import java.util.ArrayList;
 
-public class Triplo{
+public class Cuadruplo{
 
 	private ArrayList<Identificador> tSimb;
 	private ArbolExpresion arbol;
 	private String mensaje = "";
 
-	public Triplo(){ }
-	public Triplo(ArrayList<Identificador> t){
+	public Cuadruplo(){ }
+	public Cuadruplo(ArrayList<Identificador> t){
 		tSimb = t;
 		//arbol = new ArbolExpresion();
 	}
@@ -25,11 +25,11 @@ public class Triplo{
 		int i = 1;
 		for( Identificador ide: tSimb){
 			if( !ide.getTipo().equals("-") && ide.getExp() != null){
-				mensaje += "\t'''''Triplo #"+i+"''''''''''''''''''''''\n";
+				mensaje += "   '''''Cuadruplo #"+i+"''''''''''''''''''''''\n";
 				arbol = new ArbolExpresion(ide,tSimb);
 				ArrayList<Token> expresion = ide.getExp();
 				for(Token tok: expresion){
-					arbol.add(tok);
+					arbol.añadir(tok);
 				}
 				String val = arbol.resuelve();
 				ide.setValor(val);
