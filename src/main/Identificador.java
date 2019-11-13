@@ -58,6 +58,14 @@ public class Identificador {
 	public void setAlcance(String alcance) {
 		this.alcance = alcance;
 	}
-		
+	public String retExpression(){
+		String res = "";
+		if( exp != null && exp.size() != 0){
+			res = nombre+" =";
+			for(Token token : exp) 
+				res += " "+token.getToken();
+		}
+		return res;
+	}
 	
 }

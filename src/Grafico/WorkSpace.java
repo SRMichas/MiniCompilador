@@ -6,20 +6,16 @@ import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.text.AttributeSet;
 import javax.swing.text.Element;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
-import javax.swing.text.StyledDocument;
 import javax.swing.text.TabSet;
 import javax.swing.text.TabStop;
-
 import Formato.Documento;
 import main.Archivo;
-
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import javax.swing.border.MatteBorder;
 
 public class WorkSpace extends JScrollPane{
@@ -27,6 +23,7 @@ public class WorkSpace extends JScrollPane{
 	private static final long serialVersionUID = 1L;
 	private JTextPane txtTrabajo,taLineas;
 	private Archivo arc;
+	private static final int espacio = 4;
 	
 	public WorkSpace(Ventana jf) {
 		arc = new Archivo();
@@ -37,9 +34,9 @@ public class WorkSpace extends JScrollPane{
 		taLineas.setFont(new Font("Consolas", Font.PLAIN, 16));
 		setRowHeaderView(taLineas);
 		
-		Documento docc = new Documento();
-		
-		txtTrabajo = new JTextPane(docc);
+		txtTrabajo = new JTextPane();
+		Documento docc = new Documento(txtTrabajo);
+		txtTrabajo.setDocument(docc);
 		txtTrabajo.addCaretListener(new CaretListener() {
 			@Override
 			public void caretUpdate(CaretEvent e) {
@@ -73,6 +70,7 @@ public class WorkSpace extends JScrollPane{
 			@Override
 			public void insertUpdate(DocumentEvent de) {
 				taLineas.setText(getText());
+				//text(de);
 			}
  
 			@Override
@@ -81,15 +79,30 @@ public class WorkSpace extends JScrollPane{
 			}
  
 		});
-		/*TabStop[] stops = new TabStop[1];
-		stops[0] = new TabStop(60,TabStop.ALIGN_LEFT,TabStop.LEAD_NONE);
-		TabSet tSet = new TabSet(stops);
-		AttributeSet aset = StyleContext.getDefaultStyleContext()
-				.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.TabSet, tSet);
-		txtTrabajo.setParagraphAttributes(aset, false);*/
+		tab();
+		
 		setViewportView(txtTrabajo);
-		
-		
+	}
+	private void tab(){
+		FontMetrics fm = txtTrabajo.getFontMetrics( txtTrabajo.getFont() );
+        int charWidth = fm.charWidth( 'w' );
+        int tabWidth = charWidth * espacio;
+
+        TabStop[] tabs = new TabStop[10];
+
+        for (int j = 0; j < tabs.length; j++)
+        {
+             int tab = j + 1;
+             tabs[j] = new TabStop( tab * tabWidth );
+        }
+
+        TabSet tabSet = new TabSet(tabs);
+        SimpleAttributeSet attributes = new SimpleAttributeSet();
+        StyleConstants.setTabSet(attributes, tabSet);
+        StyleConstants.setFontFamily(attributes, "Consolas");
+        StyleConstants.setFontSize(attributes, 16);
+        int length = txtTrabajo.getDocument().getLength();
+        txtTrabajo.getStyledDocument().setParagraphAttributes(0, length, attributes, true);
 	}
 
 	public JTextPane getTxtTrabajo() {

@@ -141,13 +141,18 @@ public class Semantic {
 					if( valo.contains("f") && !ide.getTipo().equals("float")){
 						salida += "\tError Semantico, Fila: "+tok.getFila()+" el dato \""+tok.getToken()+"\" no es tipo \" "+ide.getTipo()+"\"\n";
 						valido = false;
-					}else if( valo.contains("f") && !ide.getTipo().equals("double")){
+					}/*else if( valo.contains("f") && !ide.getTipo().equals("double")){
 						salida += "\tError Semantico, Fila: "+tok.getFila()+" el dato \""+tok.getToken()+"\" no es tipo \""+ide.getTipo()+"\"\n";
 						valido = false;
-					}
+					}*/
+					/*if( valo.contains("f")){
+						if( !ide.getTipo().equals("float")){
+							
+						}
+					}*/
 				}else{
 					if( !ide.getTipo().equals("int")){
-						salida += "\tError Semantico, Fila: "+tok.getFila()+" el dato \""+tok.getToken()+"\" no es Entero\n";
+						salida += "\tError Semantico, Fila: "+tok.getFila()+" el dato \""+tok.getToken()+"\" no es "+ide.getTipo()+"\n";
 						valido = false;
 					}
 				}

@@ -26,7 +26,7 @@ public class Lexer {
 				 int j = i + 1;				//Avanzamos al siguiente caracter
 				 columna++;					//Incrementamos la columna
 				 try {
-					 while(Character.isLetterOrDigit(carac[j]) || carac[j] == '.'){		// mientras el siguente caracter sea digito o letra
+					 while(Character.isLetterOrDigit(carac[j]) || carac[j] == '.' || carac[j] == '_'){		// mientras el siguente caracter sea digito o letra
 						 token += carac[j];		//concatenamos el caracter
 						 j++;							//incrementamos el contador
 						 columna++;						//incrementamos el no. de columna

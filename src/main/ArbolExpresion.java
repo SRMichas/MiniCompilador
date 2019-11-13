@@ -22,8 +22,8 @@ public class ArbolExpresion {
 	*/
 	private Nodo<Token> root,actual;
 	private boolean bandera = false;
-	private int contador = 1;
-	public String result = "";
+	private int contador = 0;
+	public String result = "", temp = "";
 	private Identificador token;
 	private ArrayList<Identificador> simbolos;
 
@@ -79,10 +79,10 @@ public class ArbolExpresion {
 			case Token.ID: val = 3; break;
 		case Token.OPA:
 			if( t.getToken().matches("(\\*|/)") ){
-				System.out.println("Entro IF con -> "+t.getToken());
+				//System.out.println("Entro IF con -> "+t.getToken());
 				val = 2;
 			}else{
-				System.out.println("Entro ELSE con -> "+t.getToken());
+				//System.out.println("Entro ELSE con -> "+t.getToken());
 				val = 1;
 			}
 			/*switch (t.getToken()) {
@@ -102,15 +102,22 @@ public class ArbolExpresion {
 			return true;
 		return false;
 	}
-	public String generaTriplos(Nodo<Token> node) {
+	public String generaCuadruplo(Nodo<Token> node) {
 	     if (node != null) {
 	    	 String v1,v2;
-	    	 v1 = generaTriplos(node.izq);
-	         v2 = generaTriplos(node.der);
+	    	 v1 = generaCuadruplo(node.izq);
+	         v2 = generaCuadruplo(node.der);
 	         if( node.dato.getTipo() == Token.OPA){
-	        	 result += String.format("%8s %s %4s %4s %4s %n %n", "T"+contador,":=",v1,node.dato.getToken(),v2);
+	        	 int espacios = 8;
 	        	 contador++;
-	        	 return "T"+(contador-1);
+	        	 if( node.padre == null){
+	        		 result += String.format("%5s %-"+(espacios+2)+"s %-"+(espacios+2)
+	        				 +"s %-"+(espacios+4)+"s %-"+(espacios+4)+"s %n","",node.dato.getToken(),v1,v2,token.getNombre());
+	        	 }else
+	        		 //result += String.format("%"+espacios+"s %s %4s %4s %4s %n", "T"+contador,":=",v1,node.dato.getToken(),v2);
+	        	 	result += String.format("%5s %-"+(espacios+2)+"s %-"+(espacios+2)+"s %-"
+	        		 +(espacios+4)+"s %-"+(espacios+4)+"s %n","",node.dato.getToken(),v1,v2,"T"+contador);
+	        	 return "T"+(contador);
 	         }else{
 	        	 if( asignacion() )
 	        		 result += String.format("%8s %s %4s %n %n", "T1",":=",node.dato.getToken());
@@ -126,22 +133,24 @@ public class ArbolExpresion {
 	 	String vuelto = "";
 		 switch(token.getTipo()){
 		 	case "int":
-				vuelto = String.valueOf((int)resuelveDou(root));
-				generaTriplos(root);
-				result += String.format("%8s %s %4s %n",token.getNombre(),":=",vuelto);
+				vuelto = String.valueOf((int)resuelveGen(root));
+				//generaCuadruplo(root);
+				//result += String.format("%8s %s %4s %n",token.getNombre(),":=",vuelto);
 				break;
 		 	case "double":
-				vuelto = String.valueOf(resuelveDou(root));
-				result += token.getNombre()+" := "+vuelto+"\n";
+				vuelto = String.valueOf(resuelveGen(root));
+				//result += token.getNombre()+" := "+vuelto+"\n";
 				break;
 		 	case "float":
-				vuelto = String.valueOf(resuelveFloat(root))+"f";
-				result += token.getNombre()+" := "+vuelto+"\n";
+				vuelto = String.valueOf(resuelveGen(root))+"f";
+				//result += token.getNombre()+" := "+vuelto+"\n";
 				break;
 		 }
+		 	generaCuadruplo(root);
+			result += String.format("%8s %s %4s %n",token.getNombre(),":=",vuelto);
 		 return vuelto;
 	 }
-	 public int resuelveInt(Nodo<Token> node) {
+	 /*public int resuelveInt(Nodo<Token> node) {
 	     if (node != null) {
 	    	 int v1,v2;
 	    	 v1 = resuelveInt(node.izq);
@@ -163,12 +172,12 @@ public class ArbolExpresion {
 	         
 	     }
 	     return 0;
-	 }
-	 public double resuelveDou(Nodo<Token> node) {
+	 }*/
+	 public double resuelveGen(Nodo<Token> node) {
 	     if (node != null) {
 	    	 double v1,v2;
-	    	 v1 = resuelveDou(node.izq);
-	         v2 = resuelveDou(node.der);
+	    	 v1 = resuelveGen(node.izq);
+	         v2 = resuelveGen(node.der);
 	         if( node.dato.getTipo() == Token.OPA){
 	         	char c = node.dato.getToken().charAt(0);
 	         	double res = 0;
@@ -189,7 +198,7 @@ public class ArbolExpresion {
 	     }
 	     return 0;
 	 }
-	 public float resuelveFloat(Nodo<Token> node) {
+	 /*public float resuelveFloat(Nodo<Token> node) {
 	     if (node != null) {
 	    	 float v1,v2;
 	    	 v1 = resuelveFloat(node.izq);
@@ -213,7 +222,7 @@ public class ArbolExpresion {
 	         
 	     }
 	     return 0;
-	 }
+	 }*/
 	 private String retValor(String id){
 		 for (Identificador identificador : simbolos) {
 			if( identificador.getNombre().equals(id) )

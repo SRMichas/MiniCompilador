@@ -2,6 +2,10 @@ package Formato;
 
 import java.awt.Color;
 import java.util.ArrayList;
+
+import javax.swing.JTextPane;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
@@ -18,39 +22,124 @@ public class Documento extends DefaultStyledDocument{
 	private AttributeSet attr,attrBlack,attrBlue;
 	private final static Color r_PR = new Color(127, 0, 145),r_CAD = new Color(42, 0, 255);
 	private ArrayList<coloreado> a;
-	String currentString,oldString;
-	public Documento() {
+	public String currentString,oldString, msg = "";
+	private JTextPane panel;
+	public Documento(JTextPane txtp) {
 		cont = StyleContext.getDefaultStyleContext();
         attr = cont.addAttribute(cont.getEmptySet(),StyleConstants.Foreground,r_PR);
         attrBlack = cont.addAttribute(cont.getEmptySet(), StyleConstants.Foreground, Color.BLACK);
         attrBlue = cont.addAttribute(cont.getEmptySet(), StyleConstants.Foreground, r_CAD);
         //putProperty(PlainDocument.tabSizeAttribute, 1);
         
+        panel = txtp;
 	}
 	
+	int conta = 0;
 	@Override
-	public void insertString(int arg0, String arg1, AttributeSet arg2) throws BadLocationException {
-		char car = arg1.charAt(arg1.length() - 1);
+	public void insertString(int offs, String str, AttributeSet arg2) throws BadLocationException {
+		char car = str.charAt(str.length() - 1);
+		
 		switch (car) {
 		case '{':
-			arg1 += "}";
+			/*conta++;
+			//str += "\n\t\n}";
+			String temp = "", temp2 = "";
+			if( conta > 1){
+				for (int i = 0; i < conta; i++) {
+					temp += "\t";
+				}
+				for (int i = 1; i < conta; i++) {
+					temp2 += "\t";
+				}
+				str += "\n"+temp+"\n"+temp2+"}";
+			}else if( conta == 1){
+				str += "\n\t\n}";
+				
+			}		
+			
+			System.out.println(str);*/
+			str += "}";
 			break;
+			
 		case '(':
-			arg1 += ")";
+			str += ")";
+			panel.setCaretPosition(offs);
 			break;
 		}
-		super.insertString(arg0, arg1, arg2);
 		
+		super.insertString(offs, str, arg2);
+		String text = getText(0, getLength());
+		switch (car) {
+			case '{':  //panel.setCaretPosition(offs+(2+conta));
+				panel.setCaretPosition(offs+1);
+			//formato(text);
+			break;
+			case '(':  panel.setCaretPosition(offs+1);  break;
+		}
 		algo();
+		
 	}
-	
+
 	@Override
 	public void remove(int arg0, int arg1) throws BadLocationException {
 		// TODO Auto-generated method stub
 		super.remove(arg0, arg1);
 		algo();
 	}
-	
+	private boolean formato(String txt){
+		String s1 = "", s2 = "";
+		int conta = 0;
+		for (int i = 0; i < txt.length(); i++) {
+			char car = txt.charAt(i);
+			if( car == '{'){
+				conta++;
+				if( conta == 1){
+					s1 += car;
+					//s1 += "\n";
+				}
+				
+				if( conta == 0){
+					s1 += "\n";
+				}else if( conta == 1){
+					//s1 += " ";
+					//s1 += car;
+				}else if( conta > 1){
+					s1 += "\n";
+					int extra = 0;
+					if( conta > 2)
+						extra++;
+					for (int j = 0; j < conta+extra; j++) {
+						s1 += " ";
+					}
+					s1 += car;
+					/*for (int j = 0; j < conta; j++) {
+						s1 += " ";
+					}*/
+				}
+			}else if( car == '}'){
+				
+				if( conta == 0)
+					s1 += "\n";
+				else if( conta > 1){
+					int extra = 0;
+					if( conta > 2)
+						extra++;
+					for (int j = 0; j < conta+extra; j++) {
+						s1 += " ";
+					}
+				}
+				conta--;
+				s1 += car;
+				s1 += "\n";
+				
+			}
+			
+			
+		}
+		
+		System.out.print("=====================================\n"+s1);
+		return false;
+	}
 	private synchronized void algo() throws BadLocationException{
 		MutableAttributeSet asnew = null;
 		a = new ArrayList<>();

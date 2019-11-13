@@ -21,7 +21,10 @@ public class ModeloTabla2 extends AbstractTableModel{
 
 	@Override
 	public int getRowCount() {
+		if( ide != null)
 			return ide.size();
+		else
+			return 0;
 	}
 
 	@Override

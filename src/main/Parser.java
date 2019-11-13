@@ -324,6 +324,18 @@ public class Parser {
 			S();
 		}else if( c.getTipo() == Token.ID){
 			AE2();
+			/*
+			 * DO NOT UNCOMMENT this section, it still in process...
+			 * 
+				Avanza();
+				c = cp;
+				Acomodar(Token.SE, "=", "");
+				c=cp;
+				Expr();
+				c=cp;
+				Acomodar(Token.SE, ";", "");
+				c=cp;
+			*/
 			S();
 		}
 	}
@@ -658,7 +670,38 @@ public class Parser {
 		
 		Acomodar(Token.SE,";","");
 	}
+	private void Expr(){
+		Token c = cp;
+		Term();
+		c = cp;
+		while(!c.getToken().equals(";") && !c.getToken().equals(")")){
+			if( c.getToken().matches("[\\+|[-]|/|\\*]")){
+				Avanza();
+			}else{
+				error(Token.OPA, "arit");
+			}
+			c=cp;
+			Term();
+			c=cp;
+		}
+	}
 	
+	private void Term(){
+		Token c = cp;
+		if( c.getTipo() == Token.ID){
+			Avanza();
+		}else if(c.getTipo() == Token.DIG){
+			Avanza();
+		}else if( c.getToken().equals("(")){
+			Avanza();
+			c=cp;
+			Expr();
+			c=cp;
+			Acomodar(Token.SE, ")", "");
+		}else
+			error(-1, "TERM INvalido");
+	}
+
 	public ArrayList<Identificador> r(){
 		return ide;
 	}

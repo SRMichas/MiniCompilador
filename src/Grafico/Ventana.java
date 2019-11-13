@@ -10,6 +10,9 @@ import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import Formato.Documento2;
 import Formato.Formato;
 import main.Analizador;
@@ -72,6 +75,7 @@ public class Ventana extends JFrame{
 		setIconImage(Toolkit.getDefaultToolkit().getImage(Ventana.class.getResource("/Imagenes/icono-96.png")));
 		setTitle("vaja");
 		setSize(1200, 720);
+		//setSize(700, 720);
 		init();						//Metodo que inicializa todos los componentes
 		try
 		{
@@ -124,6 +128,7 @@ public class Ventana extends JFrame{
 		tpConsola = new JTabbedPane(JTabbedPane.TOP);
 		tpConsola.addTab("Consola",new ImageIcon(Ventana.class.getResource("/Imagenes/consola-16.png")),jscc);
 		tpConsola.addTab("Cuadruplo", jsct);
+		tpConsola.addChangeListener(new OyeTab());
 		panel3.setLeftComponent(tpConsola);
 		panel.setBottomComponent(panel3);
 		
@@ -353,12 +358,14 @@ public class Ventana extends JFrame{
 					txtTrabajo.setText(texto);	//Escribe el texto del Arhivo
 				}
 			}else if( obj == mnitEjecutar || obj == btnEjecutar ){
-				int d = workSpace.getSelectedIndex();						//indice de la pestaña actual
+				int d = workSpace.getSelectedIndex(),
+						console_idx = tpConsola.getSelectedIndex();						//indice de la pestaña actual
 				if( TS.isVisible())
 					TS.dispose();
 				WorkSpace ks = (WorkSpace) workSpace.getComponentAt(d);		//Determina el area de trabajo segun la pestaña actual
 				txtTrabajo = ks.getTxtTrabajo();							//...
 				if(!txtTrabajo.getText().equals("")){
+					bot.setView(txtCuadruplo);
 					String cs = bot.compilacion(txtTrabajo.getText());				//Obtiene una cadema con los errores lexicos en caso de haber alguno
 					txtLog.setText(Parser.salida2);
 					creaTabla(bot.retArr());									//llena la tabla de simbolos pequeña
@@ -368,7 +375,8 @@ public class Ventana extends JFrame{
 					TS.actCat(bot.retArrS());	
 					if( bot.muestra ){
 						if( !bot.retMensaje().equals("") ){
-							tpConsola.setTitleAt(1, "*Cuadruplo");
+							if( console_idx != 1)
+								tpConsola.setTitleAt(1, "*Cuadruplo");
 							txtCuadruplo.setText(bot.retMensaje());
 						}
 					}
@@ -434,6 +442,15 @@ public class Ventana extends JFrame{
 				//					//quita la pestaña actual
 			}else{
 				System.exit(0);		//Sale de la aplicacion
+			}
+		}
+	}
+	class OyeTab implements ChangeListener{
+
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			if( tpConsola.getTitleAt(tpConsola.getSelectedIndex()).contains("*C")){
+				tpConsola.setTitleAt(tpConsola.getSelectedIndex(), "Cuadruplo");
 			}
 		}
 	}
