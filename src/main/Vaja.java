@@ -1,11 +1,11 @@
 package main;
 
-import Grafico.Ventana;
+import GUIComponents.MainGUI;
 
 public class Vaja {
 
 	public static void main(String[] args) {
-		new Ventana();
+		new MainGUI();
 	}
 
 } 
