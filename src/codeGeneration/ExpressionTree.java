@@ -1,11 +1,10 @@
 package codeGeneration;
 
 import java.util.ArrayList;
-
 import entities.Identifier;
 import entities.Token;
 
-public class ArbolExpresion {
+public class ExpressionTree {
 	/*
 		1- Get the first item and initialise the tree with it.
 		2- Currently the root node is also the current node. The current node is the node we currently lie on.
@@ -23,60 +22,61 @@ public class ArbolExpresion {
 		
 		7- Repeat steps 3, 4, 5 and 6 till there is no item left.
 	*/
-	private Nodo<Token> root,actual;
-	private boolean bandera = false;
-	private int contador = 0;
+	private Node<Token> root,current;
+	private boolean flag = false;
+	private int counter = 0;
 	public String result = "", temp = "";
 	private Identifier token;
-	private ArrayList<Identifier> simbolos;
+	private ArrayList<Identifier> symbols;
 
-	public ArbolExpresion(){}
+	public ExpressionTree(){}
 
-	public ArbolExpresion(Identifier t,ArrayList<Identifier> simb){
-		token = t; simbolos = simb;
+	public ExpressionTree(Identifier t,ArrayList<Identifier> symb){
+		token = t; symbols = symb;
 	}
 	
-	public void añadir(Token t){
-		actual = insertar(actual,t);
-		bandera = false;
+	public void add(Token t){
+		current = insert(current,t);
+		flag = false;
 	}
 	
-	public Nodo<Token> insertar(Nodo<Token> current,Token t){
-		Nodo<Token> nuevo, aux;
+	public Node<Token> insert(Node<Token> current,Token t){
+		Node<Token> newNode, aux;
 		if( current == null){
-			nuevo = new Nodo<Token>(t);
+			newNode = new Node<Token>(t);
 			if( root != null){
-				nuevo.izq = root;
-				root.padre = nuevo;
+				newNode.left = root;
+				root.parent = newNode;
 			}
-			root = nuevo;
+			root = newNode;
 			
-			return nuevo;
+			return newNode;
 		}
-		nuevo = new Nodo<Token>(t);
-		int pc = prioridad(current), pnv = prioridad(nuevo);
-		if( pc >= pnv){
-			aux = insertar(current.padre,t);
-			if( bandera ){
-				current.padre = aux;
-				aux.izq = current;
+		newNode = new Node<Token>(t);
+		int currentPriority = priority(current), 
+				newPriority = priority(newNode);
+		if( currentPriority >= newPriority){
+			aux = insert(current.parent,t);
+			if( flag ){
+				current.parent = aux;
+				aux.left = current;
 			}
 			
 			current = aux;
-			bandera=false; 
+			flag=false; 
 		}else{
-			nuevo.padre = current;
-			current.der = nuevo;
-			current = nuevo;
-			bandera = true;
+			newNode.parent = current;
+			current.right = newNode;
+			current = newNode;
+			flag = true;
 		}
 		
 		return current;
 	}
 
-	private int prioridad(Nodo<Token> n){
+	private int priority(Node<Token> n){
 		int val = -1;
-		Token t = (Token) n.dato;
+		Token t = (Token) n.data;
 		switch (t.getType()) {
 		case Token.DIG: 
 			case Token.ID: val = 3; break;
@@ -100,31 +100,31 @@ public class ArbolExpresion {
 		}
 		return val;
 	}
-	private boolean asignacion(){
-		if( root.izq == null && root.der == null )
+	private boolean assignment(){
+		if( root.left == null && root.right == null )
 			return true;
 		return false;
 	}
-	public String generaCuadruplo(Nodo<Token> node) {
+	public String generateCuadruple(Node<Token> node) {
 	     if (node != null) {
-	    	 String v1,v2;
-	    	 v1 = generaCuadruplo(node.izq);
-	         v2 = generaCuadruplo(node.der);
-	         if( node.dato.getType() == Token.AOP){
-	        	 int espacios = 8;
-	        	 contador++;
-	        	 if( node.padre == null){
-	        		 result += String.format("%5s %-"+(espacios+2)+"s %-"+(espacios+2)
-	        				 +"s %-"+(espacios+4)+"s %-"+(espacios+4)+"s %n","",node.dato.getToken(),v1,v2,token.getName());
+	    	 String value1,value2;
+	    	 value1 = generateCuadruple(node.left);
+	         value2 = generateCuadruple(node.right);
+	         if( node.data.getType() == Token.AOP){
+	        	 int distance = 8;
+	        	 counter++;
+	        	 if( node.parent == null){
+	        		 result += String.format("%5s %-"+(distance+2)+"s %-"+(distance+2)
+	        				 +"s %-"+(distance+4)+"s %-"+(distance+4)+"s %n","",node.data.getToken(),value1,value2,token.getName());
 	        	 }else
 	        		 //result += String.format("%"+espacios+"s %s %4s %4s %4s %n", "T"+contador,":=",v1,node.dato.getToken(),v2);
-	        	 	result += String.format("%5s %-"+(espacios+2)+"s %-"+(espacios+2)+"s %-"
-	        		 +(espacios+4)+"s %-"+(espacios+4)+"s %n","",node.dato.getToken(),v1,v2,"T"+contador);
-	        	 return "T"+(contador);
+	        	 	result += String.format("%5s %-"+(distance+2)+"s %-"+(distance+2)+"s %-"
+	        		 +(distance+4)+"s %-"+(distance+4)+"s %n","",node.data.getToken(),value1,value2,"T"+counter);
+	        	 return "T"+(counter);
 	         }else{
-	        	 if( asignacion() )
-	        		 result += String.format("%8s %s %4s %n %n", "T1",":=",node.dato.getToken());
-	        	 return node.dato.getToken();
+	        	 if( assignment() )
+	        		 result += String.format("%8s %s %4s %n %n", "T1",":=",node.data.getToken());
+	        	 return node.data.getToken();
 	         }
 	         
 	         
@@ -132,26 +132,26 @@ public class ArbolExpresion {
 	     return "";
 	 }
 	
-	 public String resuelve(){
-	 	String vuelto = "";
+	 public String solve(){
+	 	String resultValue = "";
 		 switch(token.getType()){
 		 	case "int":
-				vuelto = String.valueOf((int)resuelveGen(root));
+				resultValue = String.valueOf((int)solveGen(root));
 				//generaCuadruplo(root);
 				//result += String.format("%8s %s %4s %n",token.getNombre(),":=",vuelto);
 				break;
 		 	case "double":
-				vuelto = String.valueOf(resuelveGen(root));
+				resultValue = String.valueOf(solveGen(root));
 				//result += token.getNombre()+" := "+vuelto+"\n";
 				break;
 		 	case "float":
-				vuelto = String.valueOf(resuelveGen(root))+"f";
+				resultValue = String.valueOf(solveGen(root))+"f";
 				//result += token.getNombre()+" := "+vuelto+"\n";
 				break;
 		 }
-		 	generaCuadruplo(root);
-			result += String.format("%8s %s %4s %n",token.getName(),":=",vuelto);
-		 return vuelto;
+		 	generateCuadruple(root);
+			result += String.format("%8s %s %4s %n",token.getName(),":=",resultValue);
+		 return resultValue;
 	 }
 	 /*public int resuelveInt(Nodo<Token> node) {
 	     if (node != null) {
@@ -176,27 +176,27 @@ public class ArbolExpresion {
 	     }
 	     return 0;
 	 }*/
-	 public double resuelveGen(Nodo<Token> node) {
+	 public double solveGen(Node<Token> node) {
 	     if (node != null) {
-	    	 double v1,v2;
-	    	 v1 = resuelveGen(node.izq);
-	         v2 = resuelveGen(node.der);
-	         if( node.dato.getType() == Token.AOP){
-	         	char c = node.dato.getToken().charAt(0);
+	    	 double value1,value2;
+	    	 value1 = solveGen(node.left);
+	         value2 = solveGen(node.right);
+	         if( node.data.getType() == Token.AOP){
+	         	char c = node.data.getToken().charAt(0);
 	         	double res = 0;
 	        	 switch(c){
-	        	 	case '+': res = v1 + v2; break;
-	        	 	case '-': res = v1 - v2; break;
-	        	 	case '*': res = v1 * v2; break;
-	        	 	case '/': res = v1 / v2; break;
+	        	 	case '+': res = value1 + value2; break;
+	        	 	case '-': res = value1 - value2; break;
+	        	 	case '*': res = value1 * value2; break;
+	        	 	case '/': res = value1 / value2; break;
 	        	 }
 	        	 //contador++;
 	        	 //result += "T"+contador+" := "+v1+"  "+c+"  "+v2+"\n";
 	        	 return res;
-	         }else if( node.dato.getType() == Token.ID)
-	        	 return Double.parseDouble(retValor(node.dato.getToken()));
+	         }else if( node.data.getType() == Token.ID)
+	        	 return Double.parseDouble(retValue(node.data.getToken()));
 	         else
-	        	 return Double.parseDouble(node.dato.getToken());
+	        	 return Double.parseDouble(node.data.getToken());
 	         
 	     }
 	     return 0;
@@ -226,17 +226,17 @@ public class ArbolExpresion {
 	     }
 	     return 0;
 	 }*/
-	 private String retValor(String id){
-		 for (Identifier identificador : simbolos) {
-			if( identificador.getName().equals(id) )
-				return identificador.getValue();
+	 private String retValue(String id){
+		 for (Identifier identifier : symbols) {
+			if( identifier.getName().equals(id) )
+				return identifier.getValue();
 		}
 		 return null;
 	 }
-	class Nodo<Token>{
-		Token dato;
-		Nodo<Token> padre,der,izq;
+	class Node<Token>{
+		Token data;
+		Node<Token> parent,right,left;
 		
-		public Nodo(Token val){ dato = val; }
+		public Node(Token val){ data = val; }
 	}
 }

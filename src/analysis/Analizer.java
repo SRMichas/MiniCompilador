@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import javax.swing.JTextPane;
 
-import codeGeneration.Cuadruplo;
+import codeGeneration.CuadrupleGenerator;
 import entities.Identifier;
 import entities.Token;
 
@@ -56,10 +56,10 @@ public class Analizer {
 			output += "\tNo Semantic Errors\n"+
 					"\n\tProgram Successfully Compiled";
 			show = true;
-			Cuadruplo cuad = new Cuadruplo(p.r(),container);
-			cuad.algo();
-			message = cuad.retMensaje();
-			symTab = cuad.retTabla();
+			CuadrupleGenerator cuad = new CuadrupleGenerator(p.r(),container);
+			cuad.genarateCuadruples();
+			message = cuad.retOutput();
+			symTab = cuad.retTable();
 		}
 		return output;
 	}
