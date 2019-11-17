@@ -54,7 +54,8 @@ public class MainGUI extends JFrame{
 	private JMenuItem mnitNew,mnitSave,mnitOpen,mnitExit,mnitRun,mnitAbout;
 	private JMenuItem mnitCopy,mnitPaste,mnitCut;
 	private JMenuItem mnitClose;
-	private JMenuItem mnitpCopy,mnitpPaste,mnitpCut,mnitTokTab,mnitSymbTab;
+	private JMenuItem mnitTokTab,mnitSymbTab,mnitObj;
+	private JMenuItem mnitpCopy,mnitpPaste,mnitpCut;
 	private JButton btnNew,btnSave,btnRun;
 	private JTabbedPane workSpace;
 	private JScrollPane jstb;
@@ -64,6 +65,7 @@ public class MainGUI extends JFrame{
 	private TokensTable TSE;
 	private SymbolTable TS;
 	private CustomFile file;
+	private ObjectCodeView OCV;
 	private Analizer bot = new Analizer();
 	private TokenTableModel ttm;
 	//private ModeloTabla2 mt2;
@@ -92,6 +94,7 @@ public class MainGUI extends JFrame{
 		JSplitPane panel3 = new JSplitPane();
 		TSE = new TokensTable(MainGUI.this, bot.retArr());		//Instancia de la tabla de simbolos extendida
 		TS = new SymbolTable(this, bot.retArrS());
+		OCV = new ObjectCodeView(this);
 		FAD = new FrameAbout(this);					//Instancia de la ventana Acerca de
 		workSpace = new JTabbedPane();					//Instancia del contenedor del area de trabajo
 		JSplitPane panel = new JSplitPane();
@@ -267,6 +270,11 @@ public class MainGUI extends JFrame{
 		mnitSymbTab.addActionListener(O);
 		mnVer.add(mnitSymbTab);
 		
+		mnitObj = new JMenuItem("Object Code");
+		mnitObj.setIcon(new ImageIcon(MainGUI.class.getResource("/images/table-16.png")));
+		mnitObj.addActionListener(O);
+		mnVer.add(mnitObj);
+		
 		JMenu mnAyuda = new JMenu("Help");
 		mnAyuda.setIcon(null);
 		menuBar.add(mnAyuda);
@@ -384,10 +392,13 @@ public class MainGUI extends JFrame{
 			}else if( obj == mnitTokTab){
 				TSE.isVisible(true);				//hace visible la tabla de simbolos extendida
 				TSE.actCat(bot.retArr());			//llena la tabla de simbolos extendida
+			}else if( obj == mnitObj ){
+				OCV.isVisible(true);
+				OCV.setFile(bot.retFile());
 			}else if( obj == mnitSymbTab){
 				if( bot.show ){
-					TS.isVisible(true);
 					TS.actCat(bot.retArrS());
+					TS.isVisible(true);
 				}else if( txtTrabajo.getText().equals(""))
 					JOptionPane.showMessageDialog(MainGUI.this, "No items to compile");	
 				else

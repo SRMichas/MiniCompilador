@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import javax.swing.JTextPane;
 
+import entities.Cuadruple;
 import entities.Identifier;
 import entities.Token;
 
@@ -38,6 +39,9 @@ public class CuadrupleGenerator{
 			doubleline += "=";
 		}
 		return doubleline += "\n";
+	}
+	public ArrayList<Cuadruple> retC(){
+		return tree.retList();
 	}
 	public void genarateCuadruples(){
 		output = "";

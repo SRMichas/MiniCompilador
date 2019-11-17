@@ -1,6 +1,8 @@
 package codeGeneration;
 
 import java.util.ArrayList;
+
+import entities.Cuadruple;
 import entities.Identifier;
 import entities.Token;
 
@@ -28,13 +30,16 @@ public class ExpressionTree {
 	public String result = "", temp = "";
 	private Identifier token;
 	private ArrayList<Identifier> symbols;
+	private ArrayList<Cuadruple> cuadruples = new ArrayList<>();
 
 	public ExpressionTree(){}
 
 	public ExpressionTree(Identifier t,ArrayList<Identifier> symb){
 		token = t; symbols = symb;
 	}
-	
+	public ArrayList<Cuadruple> retList(){
+		return cuadruples;
+	}
 	public void add(Token t){
 		current = insert(current,t);
 		flag = false;
@@ -107,19 +112,33 @@ public class ExpressionTree {
 	}
 	public String generateCuadruple(Node<Token> node) {
 	     if (node != null) {
-	    	 String value1,value2;
+	    	 String value1,value2,vv1=null,vv2=null;
 	    	 value1 = generateCuadruple(node.left);
 	         value2 = generateCuadruple(node.right);
 	         if( node.data.getType() == Token.AOP){
 	        	 int distance = 8;
 	        	 counter++;
+	        	 if( !value1.matches("(T\\d+|\\d+)")){
+	        		 vv1 = retValue(value1);
+	        	 }
+	        	 if( !value2.matches("(T\\d+|\\d+)")){
+	        		 vv2 = retValue(value2);
+	        	 }
+	        	 
 	        	 if( node.parent == null){
 	        		 result += String.format("%5s %-"+(distance+2)+"s %-"+(distance+2)
 	        				 +"s %-"+(distance+4)+"s %-"+(distance+4)+"s %n","",node.data.getToken(),value1,value2,token.getName());
-	        	 }else
+	        		 cuadruples.add(
+	        				 new Cuadruple(token.getName(), node.data.getToken(), value1, value2, vv1, vv2)	
+	        				 );
+	        	 }else{
 	        		 //result += String.format("%"+espacios+"s %s %4s %4s %4s %n", "T"+contador,":=",v1,node.dato.getToken(),v2);
 	        	 	result += String.format("%5s %-"+(distance+2)+"s %-"+(distance+2)+"s %-"
 	        		 +(distance+4)+"s %-"+(distance+4)+"s %n","",node.data.getToken(),value1,value2,"T"+counter);
+	        	 	cuadruples.add(
+	        				 new Cuadruple("T"+counter, node.data.getToken(), value1, value2, vv1, vv2)	
+	        				 );
+	        	 }
 	        	 return "T"+(counter);
 	         }else{
 	        	 if( assignment() )

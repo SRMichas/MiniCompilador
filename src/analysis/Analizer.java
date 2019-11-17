@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import javax.swing.JTextPane;
 
 import codeGeneration.CuadrupleGenerator;
+import codeGeneration.ObjectCode;
 import entities.Identifier;
 import entities.Token;
 
@@ -12,7 +13,7 @@ public class Analizer {
 	
 	private ArrayList<Token> arr = new ArrayList<>();
 	private ArrayList<Identifier> symTab;
-	private String output = "",message = "";
+	private String output = "",message = "",file="";
 	//private boolean algo = true;
 	private Lexer lex = new Lexer();
 	private Parser p;
@@ -36,6 +37,7 @@ public class Analizer {
 		container = view;
 	}
 	public String retMessage(){ return message; }
+	public String retFile(){ return file; }
 	public String compilation(String input){
 		output = "";
 		show = false;
@@ -60,6 +62,9 @@ public class Analizer {
 			cuad.genarateCuadruples();
 			message = cuad.retOutput();
 			symTab = cuad.retTable();
+			ObjectCode obj = new ObjectCode(null, cuad.retC());
+			obj.generateFile();
+			file = obj.file;
 		}
 		return output;
 	}
