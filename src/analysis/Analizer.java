@@ -1,11 +1,8 @@
 package analysis;
 
 import java.util.ArrayList;
-
 import javax.swing.JTextPane;
-
 import codeGeneration.CuadrupleGenerator;
-import codeGeneration.ObjectCode;
 import entities.Identifier;
 import entities.Token;
 
@@ -20,6 +17,7 @@ public class Analizer {
 	private Semantic sem;
 	public boolean show;
 	private JTextPane container;
+	public Object cuadrupleList,stringList;
 	
 	public ArrayList<Token> retArr(){
 		return arr;
@@ -62,9 +60,11 @@ public class Analizer {
 			cuad.genarateCuadruples();
 			message = cuad.retOutput();
 			symTab = cuad.retTable();
-			ObjectCode obj = new ObjectCode(null, cuad.retC());
+			cuadrupleList = cuad.retObjs();
+			stringList = cuad.retStr();
+			/*ObjectCode obj = new ObjectCode(null, cuad.retC());
 			obj.generateFile();
-			file = obj.file;
+			file = obj.file;*/
 		}
 		return output;
 	}

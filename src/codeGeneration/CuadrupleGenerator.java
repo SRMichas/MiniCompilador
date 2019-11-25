@@ -12,6 +12,8 @@ import entities.Token;
 public class CuadrupleGenerator{
 
 	private ArrayList<Identifier> tSymb;
+	private ArrayList<String> cuads;
+	private ArrayList<ArrayList<Cuadruple>> objs;
 	private ExpressionTree tree;
 	private String output = "";
 	private JTextPane txtpane;
@@ -20,6 +22,8 @@ public class CuadrupleGenerator{
 	public CuadrupleGenerator(ArrayList<Identifier> t,JTextPane view){
 		tSymb = t;
 		txtpane = view;
+		cuads = new ArrayList<>();
+		objs = new ArrayList<>();
 		//arbol = new ArbolExpresion();
 	}
 
@@ -43,10 +47,16 @@ public class CuadrupleGenerator{
 	public ArrayList<Cuadruple> retC(){
 		return tree.retList();
 	}
+	public ArrayList<String> retStr(){
+		return cuads;
+	}
+	public ArrayList<ArrayList<Cuadruple>> retObjs(){
+		return objs;
+	}
 	public void genarateCuadruples(){
 		output = "";
 		int i = 1;
-		String men="";
+		String men="",aux = "";
 		int space = 11;
 		String delimiter = delimiliter();
 		for( Identifier ide: tSymb){
@@ -59,14 +69,17 @@ public class CuadrupleGenerator{
 					tree.add(tok);
 					men += " "+tok.getToken();
 				}
-				output += String.format("%10s %s %s %n", ide.getName(),"=",men);
-				output += String.format("%"+space+"s "+"%"+space+"s "+"%"+space+"s "+
+				output += aux += String.format("%10s %s %s %n", ide.getName(),"=",men);
+				output += aux += String.format("%"+space+"s "+"%"+space+"s "+"%"+space+"s "+
 						"%"+space+"s %n", "Operator","Operand1","Operand2","Result");
 				String val = tree.solve();
 				ide.setValue(val);
-				output += tree.result;
+				output += aux += tree.result;
 				i++;
 				men = "";
+				cuads.add(aux);
+				objs.add(tree.retList());
+				aux = "";
 			}
 		}
 		output += delimiter;

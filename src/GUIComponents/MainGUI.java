@@ -394,7 +394,8 @@ public class MainGUI extends JFrame{
 				TSE.actCat(bot.retArr());			//llena la tabla de simbolos extendida
 			}else if( obj == mnitObj ){
 				OCV.isVisible(true);
-				OCV.setFile(bot.retFile());
+				//OCV.setFile(bot.retFile());
+				OCV.fill(bot.cuadrupleList, bot.stringList);
 			}else if( obj == mnitSymbTab){
 				if( bot.show ){
 					TS.actCat(bot.retArrS());

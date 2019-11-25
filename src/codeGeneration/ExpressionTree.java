@@ -127,14 +127,14 @@ public class ExpressionTree {
 	        	 
 	        	 if( node.parent == null){
 	        		 result += String.format("%5s %-"+(distance+2)+"s %-"+(distance+2)
-	        				 +"s %-"+(distance+4)+"s %-"+(distance+4)+"s %n","",node.data.getToken(),value1,value2,token.getName());
+	        				 +"s %-"+(distance+4)+"s %-"+(distance+0)+"s %n","",node.data.getToken(),value1,value2,token.getName());
 	        		 cuadruples.add(
 	        				 new Cuadruple(token.getName(), node.data.getToken(), value1, value2, vv1, vv2)	
 	        				 );
 	        	 }else{
 	        		 //result += String.format("%"+espacios+"s %s %4s %4s %4s %n", "T"+contador,":=",v1,node.dato.getToken(),v2);
 	        	 	result += String.format("%5s %-"+(distance+2)+"s %-"+(distance+2)+"s %-"
-	        		 +(distance+4)+"s %-"+(distance+4)+"s %n","",node.data.getToken(),value1,value2,"T"+counter);
+	        		 +(distance+4)+"s %-"+(1+0)+"s %n","",node.data.getToken(),value1,value2,"T"+counter);
 	        	 	cuadruples.add(
 	        				 new Cuadruple("T"+counter, node.data.getToken(), value1, value2, vv1, vv2)	
 	        				 );

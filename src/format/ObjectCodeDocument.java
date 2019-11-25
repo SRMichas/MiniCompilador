@@ -2,7 +2,6 @@ package format;
 
 import java.awt.Color;
 import java.util.ArrayList;
-
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
@@ -12,6 +11,8 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 
 public class ObjectCodeDocument extends DefaultStyledDocument{
+	
+	private static final long serialVersionUID = 1L;
 	
 	private ArrayList<CustomColor> array;
 	private StyleContext cont;
@@ -95,6 +96,30 @@ public class ObjectCodeDocument extends DefaultStyledDocument{
 							);
 					P = "";
 				}
+			}else if(c == '\''){
+				i++;
+				c = t.charAt(i);
+				P += c;
+				while(c != '\''){
+					P += c;
+					i++;
+					try{
+						c = t.charAt(i);	
+					}catch(StringIndexOutOfBoundsException e){ break;}
+					
+				}
+				i++;
+				try{
+					c = t.charAt(i);	
+				}catch(StringIndexOutOfBoundsException e){ c = t.charAt(i-2);}
+				P += c;
+				delimiter = i;
+				if(P.length() > 0){
+					//if(palabraRes(P)){
+						array.add(new CustomColor(delimiter-P.length(), P, '3'));
+					//}
+					P = "";
+				}
 			}else{
 				delimiter = i;
 				if( P.length() > 0 ){
@@ -114,19 +139,21 @@ public class ObjectCodeDocument extends DefaultStyledDocument{
 	}
 	private boolean wordList1(String str){
 		if( str.matches("(MODEL|DB|DW|DD|PROC|FAR|NEAR|"
-				+ "MOV|ADD|SUB|MUL|DIV|INT|END)"))
+				+ "MOV|ADD|SUB|MUL|DIV|INT|END|"
+				+ "LEA|CALL|POP|PUSH|RET|CMP|JG|INC)"))
 			return true;
 		else if( str.matches("(model|db|dw|dd|proc|far|near|"
-				+ "mov|add|sub|mul|div|int|end)"))
+				+ "mov|add|sub|mul|div|int|end|"
+				+ "lea|call|pop|push|ret|cmp|jg|inc)"))
 			return true;
 		return false;
 	}
 	private boolean wordList2(String str){
 		if( str.matches("(AL|AH|AX|EAX|BL|BH|BX|EBX|CL|CH|CX|ECX"
-				+ "|DL|DH|DX|EDX)"))
+				+ "|DL|DH|DX|EDX|SI)"))
 			return true;
 		else if( str.matches("(al|ah|ax|eax|bl|bh|bx|ebx|cl|ch|cx|ecx"
-				+ "|dl|dh|dh|edx)"))
+				+ "|dl|dh|dh|edx|si)"))
 			return true;
 		return false;
 	}

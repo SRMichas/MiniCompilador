@@ -1,40 +1,77 @@
 package codeGeneration;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import entities.Cuadruple;
-import entities.Identifier;
 
 public class ObjectCode {
 
-	public String file;
-	private String cuadruple;
+	public String file,cuadruple;
+	private String lastVar;
 	private ArrayList<Cuadruple> cuadruples2;
 	private short espacio = 10;
+	private HashMap<String, Character> some2;
+	private boolean someB = false;
 	
 	public ObjectCode(){}
-	
-	public ObjectCode(String cuad){
-		cuadruple = cuad;
-	}
 	public ObjectCode(String scuad,ArrayList<Cuadruple> cuad){
 		cuadruple = scuad;
 		cuadruples2 = cuad;
+		some2 = new HashMap<>();
 	}
 	
 	public void generateFile(){
 		generateCode();
-		//System.out.println(file);
+	}
+	private void createVariables(){
+		String definition = "";
+		file = String.format("%-"+(espacio*2)+"s%-"+(espacio+10)+"s%"+(espacio)+"s %n"
+				+"%-"+(espacio*2)+"s%-"+(espacio)+"s %n"
+				,"",".MODEL","small","",".DATA");
+				
+		String aux = "";
+		Cuadruple var = null;
+		for (int i=0;i<cuadruples2.size();i++) {
+			var = cuadruples2.get(i);
+			if( var.getOperator().equals("*")){
+				definition = "DW";
+				some2.put(var.getName(), 'D');
+				someB = true;
+			}else{
+				definition = "DW";
+				some2.put(var.getName(), 'W');
+			}
+			
+			if( var.getFirstOperandValue() != null ){
+				aux += String.format("%-"+(espacio*2)+"s%-"+(espacio+14)+"s %s %n", var.getFirstOperand(),definition,var.getFirstOperandValue());
+			}
+			if( var.getSecondOperandValue() != null){
+				aux += String.format("%-"+(espacio*2)+"s%-"+(espacio+14)+"s %s %n", var.getSecondOperand(),definition,var.getSecondOperandValue());
+			}
+			if( ((cuadruples2.size()-1) == i) && someB ){
+				//file += String.format("%-"+(espacio*2)+"s%-"+(espacio+14)+"s %s %n", var.getName(),"DD","0");
+				file += String.format("%-"+(espacio*2)+"s%-"+(espacio+14)+"s %s %n", var.getName(),"DW","0");
+				lastVar = var.getName();
+				someB = false;
+			}else{
+				file += String.format("%-"+(espacio*2)+"s%-"+(espacio+14)+"s %s %n", var.getName(),definition,"0");
+			}
+		}
+		file += aux;
+		file += String.format("%-"+(espacio*2)+"s%-"+(espacio+14)+"s %s %n", 
+				"RES","DB","10 DUP ('$')");
+		
 	}
 	private void generateCode(){
 		char op;
-		String aux = "";
+		String aux = "",register="";
 		createVariables();
-		//file += ".CODE\nMAIN PROC FAR \n.STARUP\n";
 		file += String.format("%-"+(espacio*2)+"s%s%n%-"+(espacio*2)+"s%-"+(espacio+15)+"s%s%n"+
 				"%-"+(espacio*2)+"s%s%n"
 				, "",".CODE","MAIN","PROC","FAR",
 				"",".STARTUP");
-		for (Cuadruple var : cuadruples2) {
+	
+		for (Cuadruple var: cuadruples2) {
 			op = var.getOperator().charAt(0);
 			switch(op){
 				case '+':
@@ -43,31 +80,31 @@ public class ObjectCode {
 					if( var.getFirstOperand().matches("\\d+")){
 						aux += String.format("%-"+(espacio*2)+"s%s%n",
 								"","MOV    "+var.getName()+","+var.getFirstOperand());
-						//aux += "MOV "+var.getName()+","+var.getFirstOperand()+"\n";
-						/*aux += "MOV "+var.getName()+",";
-						aux += var.getFirstOperand()+"\n";*/
 					}else{
-						//aux += "MOV AH,"+var.getFirstOperand()+"\n";
-						//aux += "MOV "+var.getName()+", AH\n";
-						//aux += ""+var.getFirstOperand()+"\n";
+						if( some2.get(var.getFirstOperand()) == 'D')
+							register = "AX";
+						else
+							register = "AX";
+						
 						aux += String.format("%-"+(espacio*2)+"s%s%n",
-								"","MOV    AH,"+var.getFirstOperand());
+								"","MOV    "+register+","+var.getFirstOperand());
 						aux += String.format("%-"+(espacio*2)+"s%s%n",
-								"","MOV    "+var.getName()+", AH");
+								"","MOV    "+var.getName()+", "+register);
 					}
 					//------
 					if( var.getSecondOperand().matches("\\d+")){
-						//aux += "ADD "+var.getName()+","+var.getSecondOperand()+"\n";
 						aux += String.format("%-"+(espacio*2)+"s%s%n",
 								"","ADD    "+var.getName()+","+var.getSecondOperand());
 					}else{
-						//aux += "MOV AH,"+var.getSecondOperand()+"\n";
-						//aux += "MOV "+var.getName()+", AH\n";
-						//aux += "ADD "+var.getName()+","+var.getSecondOperand()+"\n";
+						if( some2.get(var.getSecondOperand()) == 'D')
+							register = "AX";
+						else
+							register = "AX";
+						
 						aux += String.format("%-"+(espacio*2)+"s%s%n",
-								"","MOV    AH,"+var.getSecondOperand());
+								"","MOV    "+register+","+var.getSecondOperand());
 						aux += String.format("%-"+(espacio*2)+"s%s%n",
-								"","ADD    "+var.getName()+", AH");
+								"","ADD    "+var.getName()+", "+register);
 					}
 					
 					break;
@@ -75,128 +112,105 @@ public class ObjectCode {
 					aux += String.format("%-"+(espacio*2)+"s%s%n",
 							"",";Substraction section");
 					if( var.getFirstOperand().matches("\\d+")){
-						//aux += "MOV "+var.getName()+","+var.getFirstOperand()+"\n";
 						aux += String.format("%-"+(espacio*2)+"s%s%n",
 								"","MOV    "+var.getName()+","+var.getFirstOperand());
 					}else{
-						//aux += "MOV "+var.getName()+","+var.getFirstOperand()+"\n";
-						//aux += "MOV AH,"+var.getFirstOperand()+"\n";
-						//aux += "MOV "+var.getName()+", AH\n";
 						aux += String.format("%-"+(espacio*2)+"s%s%n",
-								"","MOV    AH,"+var.getFirstOperand());
+								"","MOV    AX,"+var.getFirstOperand());
 						aux += String.format("%-"+(espacio*2)+"s%s%n",
-								"","MOV    "+var.getName()+", AH");
+								"","MOV    "+var.getName()+", AX");
 					}
 					//........
 					if( var.getSecondOperand().matches("\\d+")){
-						//aux += "SUB "+var.getName()+","+var.getSecondOperand()+"\n";
 						aux += String.format("%-"+(espacio*2)+"s%s%n",
 								"","SUB    "+var.getName()+","+var.getSecondOperand());
 					}else{
-						//aux += "SUB "+var.getName()+","+var.getSecondOperand()+"\n";
-						//aux += "MOV AH,"+var.getSecondOperand()+"\n";
-						//aux += "MOV "+var.getName()+", AH\n";
 						aux += String.format("%-"+(espacio*2)+"s%s%n",
-								"","MOV    AH,"+var.getSecondOperand());
+								"","MOV    AX,"+var.getSecondOperand());
 						aux += String.format("%-"+(espacio*2)+"s%s%n",
-								"","SUB    "+var.getName()+", AH");
+								"","SUB    "+var.getName()+", AX");
 					}
 					break;
 				case '/':
-					/*if( var.getFirstOperand().matches("\\d+")){
-						aux += "MOV "+var.getName()+","+var.getFirstOperand()+"\n";	
-					}else{
-						aux += "MOV "+var.getName()+","+var.getFirstOperand()+"\n";
-					}
-					if( var.getSecondOperand().matches("\\d+")){
-						aux += "MUL "+var.getName()+","+var.getSecondOperand()+"\n";	
-					}else{
-						aux += "MUL "+var.getName()+","+var.getSecondOperand()+"\n";
-					}*/
-					/*aux += "MOV AX,"+var.getFirstOperand()+"\n";
-					aux += "MOV BL,"+var.getSecondOperand()+"\n";
-					aux += "DIV BL\n";
-					aux += "MOV "+var.getName()+", AL\n";*/
 					aux += String.format("%-"+(espacio*2)+"s%s%n",
 							"",";Divition Section");
 					aux += String.format("%-"+(espacio*2)+"s%s%n",
 							"","MOV    AX,"+var.getFirstOperand());
 					aux += String.format("%-"+(espacio*2)+"s%s%n",
-							"","MOV    BL,"+var.getSecondOperand());
+							"","MOV    BX,"+var.getSecondOperand());
 					aux += String.format("%-"+(espacio*2)+"s%s%n",
-							"","DIV    BL");
+							"","DIV    BX");
 					aux += String.format("%-"+(espacio*2)+"s%s%n",
-							"","MOV    "+var.getName()+", AL");
+							"","MOV    "+var.getName()+", AX"); 
 					break;
 				case '*':
-					/*if( var.getName().matches("T\\d+")){
-						aux += "MOV "+var.getName()+","+var.getFirstOperand()+"\n";	
-					}else{
-						aux += "MOV "+var.getName()+","+var.getFirstOperand()+"\n";
-					}
-					if( var.getName().matches("T\\d+")){
-						aux += "DIV "+var.getName()+","+var.getSecondOperand()+"\n";	
-					}else{
-						aux += "DIV "+var.getName()+","+var.getSecondOperand()+"\n";
-					}*/
-					/*aux += "MOV AL,"+var.getFirstOperand()+"\n";
-					aux += "MUL "+var.getSecondOperand()+"\n";
-					aux += "MOV "+var.getName()+",AX\n";*/
-					
 					aux += String.format("%-"+(espacio*2)+"s%s%n",
 							"",";Multiplication section");
 					aux += String.format("%-"+(espacio*2)+"s%s%n",
-							"","MOV    AL,"+var.getFirstOperand());
+							"","MOV    AX,"+var.getFirstOperand());
 					aux += String.format("%-"+(espacio*2)+"s%s%n",
-							"","MOV    AH,"+var.getSecondOperand());
+							"","MOV    BX,"+var.getSecondOperand());
 					aux += String.format("%-"+(espacio*2)+"s%s%n",
-							"","MUL    AH");
+							"","MUL    BX");
 					aux += String.format("%-"+(espacio*2)+"s%s%n",
 							"","MOV    "+var.getName()+", AX");
 					break;
 			}
 			file += aux;
 			aux = "";
-		}
-		//file += ".END\nMAIN ENDP\nEND";
-		file += String.format("%-"+(espacio*2)+"s%s%n",
-				"",";Print section");
-		file += String.format("%-"+(espacio*2)+"s%s%n"+
-				"%-"+(espacio*2)+"s%s%n"+
-				"%-"+(espacio*2)+"s%s%n"+
-				"%-"+(espacio*2)+"s%s%n"+
-				"%-"+(espacio*2)+"s%s%n",
-				"","ADD    "+cuadruples2.get(cuadruples2.size()-1).getName()+", 30H",
-				"","MOV    BX, 0001H",
-				"","MOV    DL,"+cuadruples2.get(cuadruples2.size()-1).getName(),
-				"","MOV    AH, 02H",
-				"","INT    21H");
+		}		
 		
-		file += String.format("%-"+(espacio*2)+"s%s%n%-"+(espacio*2)+"s%s%n%-"+(espacio*2)+"s%s", 
-				"",".EXIT","MAIN","ENDP","","END");
+		file += String.format("%-"+(espacio*2)+"s%s%n",
+				"",";Print Section");
+		println("MOV","AX", lastVar, false);
+		println("LEA", "SI", "RES", false);
+		println("CALL", "PRINT", "", true);
+		println("LEA", "DX", "RES", false);
+		println("MOV", "AH", "9", false);
+		println("INT", "21H", "", true);
+		println("MOV", "AH", "4CH", false);
+		println("INT", "21H", "", true);
+		file += String.format("%-"+(espacio*2)+"s%s%n%-"+(espacio*2)+"s%s%n", 
+				"",".EXIT","MAIN","ENDP");
+		print();
+		file += String.format("%-"+(espacio*2)+"s%s", 
+				"","END");
 	}
-	private void createVariables(){
-		String definition = "";
-		file = String.format("%-"+(espacio*2)+"s%-"+(espacio+10)+"s%"+(espacio)+"s %n"
-				+"%-"+(espacio*2)+"s%-"+(espacio)+"s %n"
-				,"",".MODEL","small","",".DATA");
-				//".MODEL small\n.DATA\n";
-		String aux = "";
-		for (Cuadruple var : cuadruples2) {
-			if( var.getOperator().equals("*"))
-				definition = "DW";
-			else
-				definition = "DB";
-			if( var.getFirstOperandValue() != null ){
-				aux += String.format("%-"+(espacio*2)+"s%-"+(espacio+14)+"s %s %n", var.getFirstOperand(),definition,var.getFirstOperandValue());
-			}
-			if( var.getSecondOperandValue() != null){
-				aux += String.format("%-"+(espacio*2)+"s%-"+(espacio+14)+"s %s %n", var.getSecondOperand(),definition,var.getSecondOperandValue());
-			}
-			file += String.format("%-"+(espacio*2)+"s%-"+(espacio+14)+"s %s %n", var.getName(),definition,"0");
-			//file += var.getName()+" DB 0\n";
-		}
-		file += aux;
+	private void print(){
+		file += String.format("%-20s%-"+(espacio+15)+"s%s%n"
+				,"PRINT","PROC","NEAR");
+		
+		println("MOV", "CX", "0", false);
+		println("MOV", "BX", "10", false);
+		file += String.format("%-"+(espacio*2)+"s%s%n",
+				"","LOOP1:");
+		println("MOV", "DX", "0", false);
+		println("DIV", "BX", "", true);
+		println("ADD", "DL", "30H", false);
+		println("PUSH", "DX", "", true);
+		println("INC", "CX", "", true);
+		println("CMP", "AX", "9", false);
+		println("JG", "LOOP1", "", true);
+		println("ADD", "AL", "30H", false);
+		println("MOV", "[SI]", "AL", false);
+		file += String.format("%-"+(espacio*2)+"s%s%n",
+				"","LOOP2:");
+		println("POP", "AX", "", true);
+		println("INC", "SI", "", true);
+		println("MOV", "[SI]", "AL", false);
+		println("LOOP", "LOOP2", "", true);
+		file += String.format("%-"+(espacio*2)+"s%s%n",
+				"","RET");
+		
+		file += String.format("%-"+(espacio*2)+"s%s%n",
+				"PRINT","ENDP");
 	}
-	
+	private void println(String dir,String arg1,String arg2,boolean single){
+		if( !single )
+			file += String.format("%-"+(espacio*2)+"s%s%n",
+					"",dir+"    "+arg1+", "+arg2);
+		else
+			file += String.format("%-"+(espacio*2)+"s%s%n",
+					"",dir+"    "+arg1);	
+	}
 }
